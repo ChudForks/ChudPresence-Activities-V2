@@ -1,0 +1,937 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ChudForks/ChudPresence-Activities-V2/blob/main/schemas/activity-v2.schema.json",
+  "title": "ChudPresence Declarative Activity V2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "scope",
+    "fields",
+    "player"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "video",
+        "movie",
+        "episode",
+        "song",
+        "stream",
+        "game",
+        "generic"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "An approved player container. Must contain an ID or class; html/body roots are forbidden."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "subtitle": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "artist": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "album": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "series": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "creator": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "channel": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "category": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "game": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        },
+        "playlist": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.text"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "selectors",
+                "attribute"
+              ],
+              "properties": {
+                "source": {
+                  "const": "dom.attribute"
+                },
+                "selectors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+                  }
+                },
+                "attribute": {
+                  "enum": [
+                    "title",
+                    "aria-label",
+                    "alt"
+                  ]
+                },
+                "removePrefix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                },
+                "removeSuffix": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "player": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter",
+        "selectors"
+      ],
+      "properties": {
+        "adapter": {
+          "enum": [
+            "html-media",
+            "prime-video"
+          ]
+        },
+        "metadata": {
+          "const": "prime-video-details",
+          "description": "Prime Video only: parse episode numbers/name and read matching public detail-page artwork from approved Amazon image CDNs."
+        },
+        "selectors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Bounded tag, ID and class selectors with descendant or child combinators. The runtime validator enforces the safe CSS subset."
+          }
+        }
+      }
+    }
+  }
+}

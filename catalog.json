@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-14T02:10:42.993Z",
+  "activities": [
+    {
+      "id": "prime-video",
+      "name": "Prime Video",
+      "description": "Show Prime Video's series, episode name and numbers, matching preview artwork, playback state and progress.",
+      "version": "1.1.0",
+      "apiVersion": 2,
+      "minExtensionVersion": "2.0.0",
+      "author": {
+        "name": "ChudPresence"
+      },
+      "category": "video",
+      "defaultMediaKind": "video",
+      "aliases": [
+        "Amazon Prime Video",
+        "Amazon Video"
+      ],
+      "tags": [
+        "movies",
+        "tv",
+        "streaming"
+      ],
+      "serviceUrl": "https://www.primevideo.com/",
+      "matches": [
+        "https://www.primevideo.com/*",
+        "https://primevideo.com/*",
+        "https://www.amazon.com/gp/video/*",
+        "https://amazon.com/gp/video/*"
+      ],
+      "settingsUi": {
+        "statusLabels": {
+          "app": "Prime Video",
+          "artist": "Title",
+          "track": "Episode"
+        }
+      },
+      "entry": "activities/prime-video/activity.json",
+      "metadata": "activities/prime-video/metadata.json",
+      "sha256": "ea8c1f5ab2e906dfa096539e849662500856c3939e10967a703aa96cd386da9b",
+      "metadataSha256": "d8619e4e4f9f7ae46bb561c38ad4900731aa14eca6cd88bafd9ca9393b899faf"
+    }
+  ]
+}
