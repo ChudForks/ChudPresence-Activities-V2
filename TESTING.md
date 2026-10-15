@@ -4,7 +4,7 @@ Verified locally on October 15, 2026:
 
 - `npm run check`: TypeScript declarations, pinned SDK/extension agreement,
   metadata/source/icon validation and catalog hashes passed.
-- `npm test`: 44 tests passed, including Prime Video movie/episode formatting,
+- `npm test`: 56 tests passed, including Prime Video movie/episode formatting,
   artwork agreement, title retention, clearing, pause/seek, invalid package
   rejection, semantic-version comparison and an isolated TypeScript CLI build.
   Google tests cover Homepage, Search/Web, modern/legacy Images, AI Mode,
@@ -12,11 +12,22 @@ Verified locally on October 15, 2026:
   parameters, unsupported pages, hidden tabs, and session timer retention/reset.
   Google 2.0.1 additionally covers bounded readiness gaps during query/mode
   transitions, omitting stale statistics and expiring at a fixed deadline.
-  Instagram 2.0.2 covers the archived Reels-only layout, default/article modes,
+  Instagram 2.3.0 covers Home, Search and profile browsing, profile tabs,
+  reserved/unsupported routes, stale-player isolation, timer retention/reset
+  and hidden-tab clearing, plus the archived Reels layout, default/article modes,
   largest paused player beside autoplay, missing captions/permalinks, public
   creator agreement, detail/card identity conflicts and invalid-winner clearing.
   Diagnostic tests verify zero-report clear reasons, deduplication and recovery,
   without captions, handles or URLs in logs.
+  Stories cover owner handles, image/no-player operation, multiple Story IDs,
+  owner changes, Story index and highlights. Every accounts/direct subpage
+  reports only Settings/Messages, including login, nested settings, inbox,
+  requests and thread routes. Tests verify timer retention, similarly named
+  profile boundaries, excluded report values and post-source isolation.
+  Saved covers different usernames, slash variants, collections and retained
+  post-viewer context without owner/collection details. Unhandled routes and
+  unknown-source posts show only On Instagram, sharing a generic elapsed timer.
+  Hidden/foreign pages and invalid required Reel metadata still clear.
 - `npm run test:extension`: the current extension accepted the catalog and ran
   the package in its actual QuickJS/WASM interpreter. Validated report/clear
   operations for playback, hidden controls, pause/seek, episode changes, player
@@ -46,6 +57,42 @@ Verified locally on October 15, 2026:
   observed failing layout. Broad `a` reads reproduce the rejected `links` field;
   2.0.2 reports the first Reel and the returning Reel. An unrelated hidden Reel
   permalink still clears, preserving the existing broker guard.
+  Version 2.1.0 adds same-document Home -> Search -> profile -> another profile
+  -> private route -> Reels transitions through the real broker and QuickJS.
+  Generic reports produce the expected Playing type, browsing text, current
+  @handle, static logo, omitted empty state lines and elapsed-only timestamps.
+  Timestamp preferences still apply. Seeded search input stays out of snapshots.
+  Version 2.1.1 uses the same `/p/Same_ID/` URL after Home, Search and two
+  different profiles to verify source context, handle and button retention
+  through the real collector, QuickJS and Discord builders. Unit regressions
+  additionally verify retained elapsed time while paging/closing posts, source
+  replacement, hidden/visible timer reset, malformed paths and unknown-source
+  clearing. No post metadata contributes to browsing reports.
+  Version 2.2.0 additionally exercises Stories/highlights, message threads and
+  multiple settings pages through the real broker, QuickJS and Discord builders.
+  A player-free fixture seeds conversation text, recipient names, email/password
+  fields and drafts. Captured reads/media stay empty; only route labels and the
+  public Story owner reach reports. Hidden tabs and discarded post context clear.
+  Version 2.3.0 adds different Saved owners/collections and Saved -> post source
+  retention in the same document. Unhandled challenge/checkpoint/popular routes
+  and unknown-source posts pass through actual Discord formatting as On Instagram.
+
+Instagram 2.1.0 broadened package matches to both Instagram origins for browsing.
+Version 2.2.0 removed direct/accounts/stories exclusions to support those states;
+2.3.0 removes the remaining challenge/checkpoint exclusions for generic fallback.
+Neither adds page reads, query
+declarations, network access or extension changes.
+The live sidebar Search link was inspected and navigated to `/explore/`; the
+profile route uses its public URL handle. The original profile page was restored
+after inspection. The user's live Search video was also observed at `/p/<id>/`
+with the background Search navigation still selected, confirming that route-only
+classification loses its source. Version 2.1.1 retains the preceding browsing
+context within its document and adds no declared reads. Direct post links and
+new documents cannot infer a source. The user's open Story page confirmed the
+`/stories/<owner>/<numeric-id>/` route without navigating or reading its content.
+The user's open Saved URL also confirmed `/<username>/saved/`; no account name
+is hardcoded in its handler. Reimport all three Instagram 2.3.0 files to verify the installed
+presence preview and Discord publication; neither was verified by these checks.
 
 The live Instagram DOM was inspected on October 15, 2026 after the initial
 2.0.0 package produced no reports. Two creator anchors share the same aria-label

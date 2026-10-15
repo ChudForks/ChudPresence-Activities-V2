@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-15T17:55:25.755Z",
+  "generatedAt": "2026-10-15T18:31:24.900Z",
   "activities": [
     {
       "id": "google",
@@ -70,8 +70,8 @@
     {
       "id": "instagram",
       "name": "Instagram",
-      "description": "Show the selected Instagram Reel caption, creator, native playback progress, Instagram logo and public Reel/Profile buttons.",
-      "version": "2.0.2",
+      "description": "Show Instagram Home, Search, profiles, Stories, Messages, Settings and Saved, with an On Instagram fallback, plus selected Reel captions, creators and playback progress.",
+      "version": "2.3.0",
       "apiVersion": 2,
       "minExtensionVersion": "2.0.2",
       "author": {
@@ -82,22 +82,27 @@
       "tags": [
         "reels",
         "social",
-        "video"
+        "video",
+        "browsing",
+        "profiles",
+        "search",
+        "stories",
+        "messages",
+        "settings",
+        "saved"
       ],
       "serviceUrl": "https://www.instagram.com/",
       "matches": [
-        "https://www.instagram.com/reels*",
-        "https://instagram.com/reels*",
-        "https://www.instagram.com/reel/*",
-        "https://instagram.com/reel/*"
+        "https://www.instagram.com/*",
+        "https://instagram.com/*"
       ],
       "frames": "top",
       "network": [],
       "settingsUi": {
         "statusLabels": {
           "app": "Instagram",
-          "artist": "Creator",
-          "track": "Reel"
+          "artist": "Profile / creator",
+          "track": "Activity / Reel"
         }
       },
       "pageAccess": {
@@ -160,8 +165,8 @@
       },
       "entry": "activities/instagram/activity.js",
       "metadata": "activities/instagram/metadata.json",
-      "sha256": "762cab0c699732bbf1db54e8e8063f213819d2f1e833514a8d339f048e5d1157",
-      "metadataSha256": "09774d5f26ef80045e79e755e582e841a125224b2ce05a912f677292c1072646",
+      "sha256": "c9e567a85850ece7ec7dbdfe7036d69e3ddd7b8d2098c92822c0fcce03c93d30",
+      "metadataSha256": "973b744afb1a1b77514de616196a08217a28dba043fec021c93842556bbca419",
       "icon": "activities/instagram/icon.png",
       "iconSha256": "319808354a4def201154a6586c8fb50d4da6e07a98748fbf6c04e50a4f033540"
     },

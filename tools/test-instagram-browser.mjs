@@ -99,7 +99,7 @@ try {
       card.append(control);
     }
   });
-  assert.equal((await sample()).call.operation, 'presence.clear');
+  assert.equal((await sample()).call.report.display.details, 'Browsing Home');
   const broadLinks = structuredClone(metadata.pageAccess);
   broadLinks.mediaScopes.reel.selectors.links.selector = 'a';
   async function enter(path) { await page.evaluate(path => history.pushState({}, '', path), path); }
@@ -141,6 +141,87 @@ try {
   const hidden = createPresenceIntent(track, 100000, { showArtwork: false, showButtons: false, showTimestamps: false });
   assert.equal(hidden.assets, null); assert.deepEqual(hidden.buttons, []); assert.equal(hidden.timestamps, null);
 
+  // The same /p/<id>/ viewer can open from Home, Search or a profile. Each
+  // retains the preceding context without reading its input or video metadata.
+  await reset('https://www.instagram.com/');
+  await page.locator('body').evaluate(body => {
+    const input = document.createElement('input'); input.setAttribute('aria-label', 'Search input'); input.value = 'PRIVATE_SEARCH_DRAFT'; body.append(input);
+  });
+  for (const [pathname, details, state] of [
+    ['/', 'Browsing Home', undefined], ['/p/Same_ID/', 'Browsing Home', undefined],
+    ['/explore/', 'Browsing Search', undefined], ['/p/Same_ID/', 'Browsing Search', undefined],
+    ['/explore/search/', 'Browsing Search', undefined], ['/p/SearchVideo_1/', 'Browsing Search', undefined],
+    ['/p/SearchVideo_2/', 'Browsing Search', undefined], ['/explore/', 'Browsing Search', undefined],
+    ['/profile.viewer/', 'Viewing profile', '@profile.viewer'],
+    ['/p/Same_ID/', 'Viewing profile', '@profile.viewer'], ['/profile.viewer/reposts/', 'Viewing profile', '@profile.viewer'],
+    ['/another.viewer/', 'Viewing profile', '@another.viewer'], ['/p/Same_ID/', 'Viewing profile', '@another.viewer'],
+    ['/first.user/saved/', 'Saved', undefined], ['/p/Same_ID/', 'Saved', undefined],
+    ['/Second_User/saved/all-posts/', 'Saved', undefined], ['/p/Same_ID/', 'Saved', undefined],
+  ]) {
+    await enter(pathname);
+    const { snapshot, call } = await sample();
+    assert.deepEqual(snapshot.reads, {});
+    const browsingTrack = { ...normalizeActivityReport(call.report, 2), activityId: metadata.id, activityName: metadata.name };
+    const browsingIntent = createPresenceIntent(browsingTrack, 100000);
+    const browsingActivity = buildHeadlessActivity(browsingIntent, '1549066134706323548');
+    assert.equal(call.report.kind, 'generic');
+    assert.equal(browsingActivity.name, 'Instagram');
+    assert.equal(browsingActivity.type, 0);
+    assert.equal(browsingActivity.details, details);
+    assert.equal(browsingActivity.state, state);
+    assert.ok(browsingActivity.timestamps.start > 0);
+    assert.equal(browsingActivity.timestamps.end, undefined);
+    assert.equal(browsingActivity.assets.large_image, report.artwork.large);
+    assert.deepEqual(call.report.buttons, state ? [{ label: 'View Profile', url: 'https://www.instagram.com/' + state.slice(1) + '/' }] : []);
+    const noProgress = createPresenceIntent(browsingTrack, 100000, { showTimestamps: false });
+    assert.equal(noProgress.timestamps, null);
+  }
+  for (const pathname of ['/challenge/', '/checkpoint/', '/popular/', '/p/Post_ID/']) {
+    await enter(pathname);
+    assert.equal((await sample()).call.report.display.details, 'On Instagram');
+  }
+  await enter('/reels/');
+  assert.equal((await sample()).call.report.kind, 'video', 'Returning to Reels restores playback reporting');
+  await enter('/');
+  await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
+  assert.equal((await sample()).call.operation, 'presence.clear');
+
+  // These states need no media or page text. Seed private conversation/account
+  // fields in the DOM and verify only generic route labels reach Discord.
+  await reset('https://www.instagram.com/explore/');
+  await page.locator('body').evaluate(body => {
+    body.innerHTML = '<main><h1>PRIVATE_RECIPIENT</h1><p>PRIVATE_MESSAGE</p><form><input type="email" value="PRIVATE_EMAIL"><input type="password" value="PRIVATE_PASSWORD"><textarea>PRIVATE_DRAFT</textarea></form></main>';
+  });
+  assert.equal((await sample()).call.report.display.details, 'Browsing Search');
+  for (const [pathname, details, state] of [
+    ['/stories/story.viewer/4008117685975060734/', 'Watching story', '@story.viewer'],
+    ['/stories/story.viewer/4008117685975060735/', 'Watching story', '@story.viewer'],
+    ['/stories/another.viewer/123/', 'Watching story', '@another.viewer'],
+    ['/stories/', 'Browsing Stories', undefined], ['/stories/highlights/123456789/', 'Watching highlights', undefined],
+    ['/direct/inbox/', 'Messages', undefined], ['/direct/t/987654321/', 'Messages', undefined],
+    ['/accounts/edit/', 'Settings', undefined], ['/accounts/privacy_and_security/', 'Settings', undefined],
+    ['/accounts/notifications/email/', 'Settings', undefined],
+  ]) {
+    await enter(pathname);
+    const { snapshot, call } = await sample();
+    assert.deepEqual(snapshot.reads, {});
+    assert.deepEqual(snapshot.media, []);
+    const pageTrack = { ...normalizeActivityReport(call.report, 2), activityId: metadata.id, activityName: metadata.name };
+    const pageActivity = buildHeadlessActivity(createPresenceIntent(pageTrack, 100000), '1549066134706323548');
+    assert.equal(pageActivity.details, details);
+    assert.equal(pageActivity.state, state);
+    assert.equal(pageActivity.type, 0);
+    assert.ok(pageActivity.timestamps.start > 0);
+    assert.equal(pageActivity.timestamps.end, undefined);
+    assert.deepEqual(call.report.buttons, state ? [{ label: 'View Profile', url: 'https://www.instagram.com/' + state.slice(1) + '/' }] : []);
+    assert.doesNotMatch(JSON.stringify(pageActivity), /PRIVATE|400811768597506073[45]|987654321|privacy_and_security|notifications/);
+  }
+  await enter('/p/Same_ID/');
+  assert.equal((await sample()).call.report.display.details, 'On Instagram', 'Settings cannot become a post source');
+  await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
+  await enter('/direct/inbox/');
+  assert.equal((await sample()).call.operation, 'presence.clear');
+
   for (const mutate of [
     () => page.locator('#current .caption').evaluate(node => node.style.display = 'none'),
     () => page.locator('#current .caption [dir]').evaluate(node => node.innerHTML += '<span hidden>PRIVATE_HIDDEN</span>'),
@@ -173,10 +254,11 @@ try {
   result = await sample();
   assert.equal(result.call.operation, 'presence.clear', 'An avatar alone cannot supply the creator identity');
   assert.ok(logs.some(entry => entry.args[1]?.reason === 'creator-not-matched'));
-  for (const url of ['/reel/Example_123-/', '/reels/Example_123-/', '/reel/Other_ID/', '/stories/example.creator/123/', '/direct/inbox/']) {
+  for (const url of ['/reel/Example_123-/', '/reels/Example_123-/', '/reel/Other_ID/', '/challenge/', '/checkpoint/']) {
     await reset('https://www.instagram.com' + url);
     result = await sample();
-    assert.equal(result.call.operation, url.includes('Example_123-') ? 'presence.report' : 'presence.clear');
+    assert.equal(result.call.operation, url.includes('Other_ID') ? 'presence.clear' : 'presence.report');
+    if (url === '/challenge/' || url === '/checkpoint/') assert.equal(result.call.report.display.details, 'On Instagram');
   }
   await reset();
   await page.locator('#current').evaluate(card => {
@@ -188,5 +270,5 @@ try {
   assert.equal((await sample()).call.report.display.details, 'Article caption');
   await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
   assert.equal((await sample()).call.operation, 'presence.clear');
-  console.log('Instagram browser fixtures passed: Home -> first Reel -> next -> return with hidden/visible SVG audio controls, retained hidden-permalink rejection, avatar-before-username regression, deep cards, paused winner beside autoplay, clean links, Discord payload/preferences, hidden/private fields, ambiguous players and cleanup through the current broker and actual QuickJS.');
+  console.log('Instagram browser fixtures passed: Home/Search/profile/Saved source retention, On Instagram fallback, Stories/highlights, generic Messages/Settings without page content, SPA transitions, Discord payloads/elapsed time, hidden-tab cleanup, Home -> first Reel -> next -> return with hidden/visible SVG audio controls, retained hidden-permalink rejection, avatar-before-username regression, deep cards, paused winner beside autoplay, clean links, preferences, hidden/private fields and ambiguous players through the current broker and actual QuickJS.');
 } finally { sandbox?.dispose(); await browser.close(); }

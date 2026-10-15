@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const logo = 'https://play-lh.googleusercontent.com/yHi59jmO_lVamcyJ1i3rM1_E8bAiAspShnGjjURq05ipQQSUksO3QVEsXTegRSqul038-4YNA7O644XAcx251Q=s512';
-  const reserved = /^(?:accounts|about|api|developer|direct|directory|emails|explore|legal|p|privacy|reel|reels|stories|tv|web)$/i;
+  const reserved = /^(?:accounts|about|ads|api|challenge|checkpoint|developer|developers|direct|directory|download|emails|explore|graphql|help|legal|notifications|oauth|p|popular|press|privacy|push|reel|reels|saved|session|settings|stories|terms|tv|web|your_activity)$/i;
   const text = value => typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
   function publicPath(value, origin) {
     // URL is deliberately unavailable in the guest. Broker URLs are already
@@ -11,14 +11,40 @@
     return /[?\u0023%\\]/.test(path) ? null : path;
   }
   const reelId = path => /^\/reels?\/([A-Za-z0-9_-]{1,128})\/?$/.exec(path || '')?.[1] || null;
+  function browsingRoute(path) {
+    if (path === '/') return { key: 'home', title: 'Home', details: 'Browsing Home', retainPosts: true };
+    if (/^\/explore(?:\/search)?\/?$/.test(path)) {
+      return { key: 'search', title: 'Search', details: 'Browsing Search', retainPosts: true };
+    }
+    if (/^\/accounts(?:\/|$)/.test(path)) return { key: 'settings', title: 'Settings', details: 'Settings' };
+    if (/^\/direct(?:\/|$)/.test(path)) return { key: 'messages', title: 'Messages', details: 'Messages' };
+    const savedOwner = /^\/([A-Za-z0-9_.]{1,30})\/saved(?:\/|$)/.exec(path)?.[1];
+    if (savedOwner && !/^\.+$/.test(savedOwner) && !reserved.test(savedOwner)) {
+      return { key: 'saved', title: 'Saved', details: 'Saved', retainPosts: true };
+    }
+    if (/^\/stories\/?$/.test(path)) return { key: 'stories', title: 'Stories', details: 'Browsing Stories' };
+    if (/^\/stories\/highlights\/[0-9]{1,64}\/?$/.test(path)) {
+      return { key: 'highlights', title: 'Highlights', details: 'Watching highlights' };
+    }
+    const storyOwner = /^\/stories\/([A-Za-z0-9_.]{1,30})(?:\/[0-9]{1,64})?\/?$/.exec(path)?.[1];
+    if (storyOwner && !/^\.+$/.test(storyOwner) && !reserved.test(storyOwner) && !/^(?:highlights|archive)$/i.test(storyOwner)) {
+      return { key: 'story:' + storyOwner.toLowerCase(), title: 'Story', details: 'Watching story', username: storyOwner };
+    }
+    const username = /^\/([A-Za-z0-9_.]{1,30})(?:\/(?:reels|tagged|reposts))?\/?$/.exec(path)?.[1];
+    if (!username || /^\.+$/.test(username) || reserved.test(username)) return null;
+    return { key: 'profile:' + username.toLowerCase(), title: '@' + username, details: 'Viewing profile', username, retainPosts: true };
+  }
+  let browsingContext = null;
+  let session = null;
   let lastOutcome = '';
   async function clear(reason, evidence = {}) {
+    session = null;
     // Log state changes, without captions, creator names or URL values. Repeated
     // polls stay quiet; a zero-report installation still explains its blocker.
     const signature = JSON.stringify({ reason, ...evidence });
     if (signature !== lastOutcome) {
       lastOutcome = signature;
-      await ChudPresence.log.debug('Instagram: waiting for a valid Reel', { reason, ...evidence });
+      await ChudPresence.log.debug('Instagram: waiting for a supported activity', { reason, ...evidence });
     }
     await ChudPresence.clear();
   }
@@ -26,10 +52,37 @@
   ChudPresence.onUpdate(async () => {
     const page = ChudPresence.page.info();
     const path = page.pathname || '';
-    if (!['https://www.instagram.com', 'https://instagram.com'].includes(page.origin) ||
-        page.visibilityState !== 'visible' || !/^\/reels\/?$/.test(path) && !reelId(path)) {
+    if (!['https://www.instagram.com', 'https://instagram.com'].includes(page.origin)) {
+      browsingContext = null;
       await clear('page-ineligible', { visibility: page.visibilityState || 'unavailable' }); return;
     }
+    // /p/<id>/ is shared by Search, Home, Saved and profile post viewers. Keep the
+    // preceding browsing context in this document; the post URL has no source.
+    const post = /^\/p\/[A-Za-z0-9_-]{1,128}\/?$/.test(path);
+    const reelPage = /^\/reels\/?$/.test(path) || !!reelId(path);
+    const browsing = browsingRoute(path) || (post ? browsingContext : null) ||
+      (!reelPage ? { key: 'instagram', title: 'Instagram', details: 'On Instagram' } : null);
+    browsingContext = browsing?.retainPosts ? browsing : null;
+    if (page.visibilityState !== 'visible') {
+      await clear('page-ineligible', { visibility: page.visibilityState || 'unavailable' }); return;
+    }
+    if (browsing) {
+      const now = Date.now();
+      if (session?.key !== browsing.key) session = { key: browsing.key, startedAt: now };
+      await ChudPresence.report({
+        kind: 'generic', media: { title: browsing.title },
+        display: { name: 'Instagram', details: browsing.details, state: browsing.username ? '@' + browsing.username : '', statusDisplay: 'name' },
+        playback: { state: 'playing', elapsed: true, position: Math.min(31536000, Math.max(0, (now - session.startedAt) / 1000)) },
+        artwork: { large: logo, largeText: 'Instagram' },
+        buttons: browsing.username ? [{ label: 'View Profile', url: page.origin + '/' + browsing.username + '/' }] : [],
+      });
+      if (lastOutcome !== 'browsing') {
+        lastOutcome = 'browsing';
+        await ChudPresence.log.info('Instagram: reporting browsing activity');
+      }
+      return;
+    }
+    session = null;
     // Choose the player before examining its metadata. A broken winning card
     // must clear, including when a smaller neighboring video is autoplaying.
     const media = ChudPresence.media.getAll();

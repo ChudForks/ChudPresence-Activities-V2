@@ -1,7 +1,7 @@
 # ChudPresence Activities V2
 
 An independent Git repository for programmable, sandboxed Activity API V2
-packages: **Prime Video 2.0.0**, **Google 2.0.1** and **Instagram 2.0.2**. This replaces the old
+packages: **Prime Video 2.0.0**, **Google 2.0.1** and **Instagram 2.3.0**. This replaces the old
 declarative V2 repository layout: packages contain `metadata.json` and ordinary
 JavaScript in `activity.js`. The historical JSON packages stay under the Activity
 Lab's `references/legacy-activity-api-v2/` directory.
@@ -9,9 +9,11 @@ Lab's `references/legacy-activity-api-v2/` directory.
 Google supports Homepage, Search, Images and AI Mode with the submitted query,
 visible result statistics and elapsed time. See its [layout and local installation guide](activities/google/README.md).
 
-Instagram supports Reels with the archived caption/creator layout, native
+Instagram supports Home, Search, profiles, Stories, Messages, Settings and Saved
+with elapsed time and an On Instagram fallback, plus Reels with the archived caption/creator layout, native
 progress, static logo and public buttons. It requires extension **2.0.2**'s
 bounded media scopes. See its [local installation guide](activities/instagram/README.md).
+Post viewers retain their preceding Home, Search, Saved or profile activity.
 
 All Prime Video selection, episode parsing, metadata retention, artwork matching,
 and presence formatting live in the Activity package. It uses the existing V2
@@ -43,7 +45,7 @@ activities/prime-video/activity.js     self-contained sandboxed package
 activities/prime-video/icon.png        official service icon
 activities/prime-video/tests/          behavior tests and synthetic player page
 activities/google/                    Google metadata, JavaScript, icon, guide and search fixtures
-activities/instagram/                 Instagram Reels package, guide and multi-player fixtures
+activities/instagram/                 Instagram browsing/Reels package, guide and fixtures
 catalog.json                          generated metadata and SHA-256 hashes
 schemas/                              V2 metadata, reports, catalog, and SDK types
 sdk/                                  pinned extension validator/page-broker snapshot
