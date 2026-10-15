@@ -16,7 +16,7 @@ export function primeSnapshot({ page = {}, reads = {}, media } = {}) {
   };
 }
 
-export function createHarness(source = primeSource) {
+export function createHarness(source = primeSource, { now = () => Date.now() } = {}) {
   let current;
   let callback;
   const calls = [];
@@ -34,7 +34,7 @@ export function createHarness(source = primeSource) {
     },
     async clear() { calls.push({ operation: 'presence.clear' }); return { cleared: true }; },
   };
-  const context = createContext({ ChudPresence: api });
+  const context = createContext({ ChudPresence: api, Date: class extends Date { static now() { return now(); } } });
   new Script(source).runInContext(context, { timeout: 1000 });
   return { calls, async update(snapshot) {
     current = copy(snapshot);

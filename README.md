@@ -1,10 +1,13 @@
 # ChudPresence Activities V2
 
 An independent Git repository for programmable, sandboxed Activity API V2
-packages. The first package is **Prime Video 2.0.0**. This replaces the old
+packages: **Prime Video 2.0.0** and **Google 2.0.1**. This replaces the old
 declarative V2 repository layout: packages contain `metadata.json` and ordinary
 JavaScript in `activity.js`. The historical JSON packages stay under the Activity
 Lab's `references/legacy-activity-api-v2/` directory.
+
+Google supports Homepage, Search, Images and AI Mode with the submitted query,
+visible result statistics and elapsed time. See its [layout and local installation guide](activities/google/README.md).
 
 All Prime Video selection, episode parsing, metadata retention, artwork matching,
 and presence formatting live in the Activity package. It uses the existing V2
@@ -35,6 +38,7 @@ activities/prime-video/metadata.json   permissions and fixed public page reads
 activities/prime-video/activity.js     self-contained sandboxed package
 activities/prime-video/icon.png        official service icon
 activities/prime-video/tests/          behavior tests and synthetic player page
+activities/google/                    Google metadata, JavaScript, icon, guide and search fixtures
 catalog.json                          generated metadata and SHA-256 hashes
 schemas/                              V2 metadata, reports, catalog, and SDK types
 sdk/                                  pinned extension validator/page-broker snapshot
@@ -81,7 +85,9 @@ source dependencies; restart it after metadata changes. Prime Video is authored
 directly as `activity.js`; its `build` command validates it and updates the catalog.
 
 Increase the package version whenever metadata, installed JavaScript, or the icon
-changes. Prime Video starts at **2.0.0**, above the archived declarative 1.1.1.
+changes. Prime Video starts at **2.0.0**, above the archived declarative 1.1.1;
+Google started at **2.0.0**, above its archived declarative 1.0.1, and is now
+**2.0.1** with bounded navigation smoothing (requires extension 2.0.1).
 The version gate compares committed changes with `HEAD^`, or `--base=<git-ref>`;
 initial repositories have no previous versions to compare.
 

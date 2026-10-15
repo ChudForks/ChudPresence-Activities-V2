@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/ChudForks/ChudPresence-Activities/blob/main/schemas/activity-report.schema.json",
-  "title": "ChudPresence Activity API v1 Report",
+  "$id": "https://chudpresence.local/schemas/activity-v2-report.schema.json",
+  "title": "ChudPresence Activity API v2 Report",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -100,6 +100,10 @@
           "type": "number",
           "minimum": 0,
           "maximum": 16
+        },
+        "elapsed": {
+          "type": "boolean",
+          "description": "Elapsed time for a generic page activity, without a Live label."
         }
       }
     },
@@ -125,6 +129,12 @@
             "details",
             "state"
           ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "\\S"
         }
       }
     },
@@ -192,5 +202,43 @@
       "maxLength": 2048,
       "pattern": "^https://"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "playback"
+        ],
+        "properties": {
+          "playback": {
+            "required": [
+              "elapsed"
+            ],
+            "properties": {
+              "elapsed": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "generic"
+          },
+          "playback": {
+            "properties": {
+              "live": {
+                "const": false
+              },
+              "duration": {
+                "const": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

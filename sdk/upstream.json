@@ -1,30 +1,30 @@
 {
   "repository": "ChudForks/ChudPresenceSolo-Chromium-Activity-Lab",
-  "revision": "7a78f014f9c39d9d352bcd0bb0dffef073a896d0",
+  "revision": "3d189dae5f391833a8e372f06d14a3d67d5bf6b3",
   "files": {
     "ACTIVITY_API_V2.md": {
       "source": "extension/ACTIVITY_API_V2.md",
-      "sha256": "0584e3c65e99b8d8e21a737903e4b302be62dd4c66524a310f5b56b14ff065b0"
+      "sha256": "2b875f0e44f5f0f58f3a243b22a0829e7883c16ad48f329ecd0c98f8f6d4b8b0"
+    },
+    "schemas/activity-report.schema.json": {
+      "source": "schemas/activity-v2-report.schema.json",
+      "sha256": "3c608d8f467c07728ce551e13b473b8fe60a61bfc25f5b1639a183139ff8df41"
     },
     "schemas/activity-api-v2.json": {
       "source": "schemas/activity-api-v2.json",
-      "sha256": "83e6eff2bee329aa84e3aedabe925c778e1a9847a6663fdfb73e2aa302b6cfd8"
+      "sha256": "98cf3c1f422093ea78d6a764f40f5d96556986352e8cf5eb873ea13db2c49909"
     },
     "schemas/activity-v2.schema.json": {
       "source": "schemas/activity-v2.schema.json",
-      "sha256": "7cd8df66ad1cbc4d56baed3167821f8d4f93f895e395ab317dbaa902e10b4e79"
+      "sha256": "51320c6ec71fde2137df0cafba44b2ddcdc6fb40dd73098a14d320ce44cee5ed"
     },
     "schemas/activity-api-v2.d.ts": {
       "source": "schemas/activity-api-v2.d.ts",
-      "sha256": "76e6695696fd15c66466047b8ed6b5549e96a59580e3f5757c06bf4389e43a26"
-    },
-    "schemas/activity-report.schema.json": {
-      "source": "schemas/activity-report.schema.json",
-      "sha256": "ae680399a9a9ab6df5a47ec69ace4315c4e41d98b0dd5384169a76e89e13fdf0"
+      "sha256": "ccf63fed87296cb24b071bde771eb068c7dfa6718111d655773da18c80acc777"
     },
     "sdk/activity-validator.js": {
       "source": "extension/core/activity-validator.js",
-      "sha256": "79ec4e0d0fdf9836147f3c14259a9536fba7d08e066a705bca652b49402387e2"
+      "sha256": "f01d1cb8c001edac8702d4ec3d5eb7e3da23c2b07bd0f98c5bf7193dd8b17d62"
     },
     "sdk/activity-settings.js": {
       "source": "extension/core/activity-settings.js",
@@ -36,7 +36,7 @@
     },
     "sdk/activity-v2-page.js": {
       "source": "extension/core/activity-v2-page.js",
-      "sha256": "6d7741efd185b8ba56fc61315706aec0ca99c44bffcbffc0c71de35d2e92eb0a"
+      "sha256": "d55d7e450a77c40c354ae25624852e2a0c6a16228023e8397b7f7a1fd541b014"
     }
   }
 }

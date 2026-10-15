@@ -8,7 +8,7 @@ import { readPackage, root, buildCatalog, digest, validateMetadata } from './bui
 const metadata = JSON.parse(await fs.readFile(path.join(root, 'activities/prime-video/metadata.json'), 'utf8'));
 
 test('catalog includes the unchanged metadata declarations and LF hashes for V2 packages', async () => {
-  const [entry] = await buildCatalog({ check: true });
+  const entry = (await buildCatalog({ check: true })).find(entry => entry.id === 'prime-video');
   const { icon, entry: ignored, ...fields } = metadata;
   for (const [name, value] of Object.entries(fields)) assert.deepEqual(entry[name], value);
   assert.equal(entry.apiVersion, 2);

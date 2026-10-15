@@ -9,6 +9,8 @@ const upstream = path.resolve(process.env.CHUDPRESENCE_EXTENSION_ROOT || path.jo
 await import(pathToFileURL(path.join(upstream, 'extension/core/activity-v2-engine.generated.js')));
 const { validateCatalog } = await import(pathToFileURL(path.join(upstream, 'extension/core/activity-repository.js')));
 const { normalizeActivityReport } = await import(pathToFileURL(path.join(upstream, 'extension/core/activity-validator.js')));
+const { createPresenceIntent } = await import(pathToFileURL(path.join(upstream, 'extension/core/presence.js')));
+const { buildHeadlessActivity } = await import(pathToFileURL(path.join(upstream, 'extension/discord/activity-builder.js')));
 const catalog = validateCatalog(JSON.parse(await fs.readFile(path.join(root, 'catalog.json'), 'utf8')));
 assert.equal(catalog.activities[0].apiVersion, 2);
 const calls = [];
@@ -48,3 +50,38 @@ try {
   assert.equal((await update(primeSnapshot({ reads: { title: null }, page: { pathname: '/gp/video/detail/OTHER' } }))).operation, 'presence.clear');
   console.log('Extension integration passed: catalog accepted; Prime Video executes and reports in the actual QuickJS/WASM guest.');
 } finally { sandbox.dispose(); }
+
+const googleSource = await fs.readFile(path.join(root, 'activities/google/activity.js'), 'utf8');
+const googleCalls = [];
+const googleErrors = [];
+const google = await globalThis.ChudPresenceV2Engine.createActivityV2Sandbox({ source: googleSource,
+  request(operation, payload) {
+    const report = operation === 'presence.report' ? normalizeActivityReport(payload.report, 2) : null;
+    googleCalls.push({ operation, report });
+    return { accepted: true };
+  }, onError(error) { googleErrors.push(String(error)); },
+});
+try {
+  for (const [udm, name] of [[null, 'Google'], ['2', 'Google Images'], ['50', 'Google AI']]) {
+    const snapshot = { page: { origin: 'https://www.google.com', pathname: '/search', visibilityState: 'visible', query: { q: 'test', udm, tbm: null } },
+      reads: { googleApps: '', resultStats: 'About 100 results (0.22 seconds)' }, media: [] };
+    assert.equal(google.update(snapshot), true);
+    for (let i = 0; i < 48; i++) await Promise.resolve();
+    assert.deepEqual(googleErrors, []);
+    const call = googleCalls.at(-1);
+    assert.equal(call.operation, 'presence.report');
+    const intent = createPresenceIntent({ ...call.report, activityName: 'Google', activityId: 'google' });
+    const activity = buildHeadlessActivity(intent, '1549066134706323548');
+    assert.equal(activity.name, name);
+    assert.equal(activity.type, 0);
+    assert.equal(activity.details, 'Searching for : test');
+    assert.equal(activity.state, udm ? undefined : 'About 100 results (0.22 seconds)');
+    assert.ok(activity.timestamps.start > 0);
+    assert.equal(activity.timestamps.end, undefined);
+    google.update({ ...snapshot, page: { ...snapshot.page, visibilityState: 'hidden' } });
+    for (let i = 0; i < 48; i++) await Promise.resolve();
+    assert.equal(googleCalls.at(-1).operation, 'presence.clear');
+  }
+  assert.deepEqual(googleErrors, []);
+  console.log('Google extension integration passed: actual QuickJS, mode names, Playing, text, omitted state, elapsed timestamps and hidden-tab clearing.');
+} finally { google.dispose(); }

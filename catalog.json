@@ -1,7 +1,72 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-15T03:43:01.682Z",
+  "generatedAt": "2026-10-15T14:13:00.910Z",
   "activities": [
+    {
+      "id": "google",
+      "name": "Google",
+      "description": "Show the Google homepage, Search, Images and AI Mode with the submitted query, visible search statistics and elapsed time.",
+      "version": "2.0.1",
+      "apiVersion": 2,
+      "minExtensionVersion": "2.0.1",
+      "author": {
+        "name": "ChudPresence"
+      },
+      "category": "utilities",
+      "defaultMediaKind": "generic",
+      "presence": {
+        "kind": "generic",
+        "navigationGraceMs": 4000
+      },
+      "aliases": [
+        "Google Search",
+        "Google Images",
+        "Google AI"
+      ],
+      "tags": [
+        "search",
+        "images",
+        "ai"
+      ],
+      "serviceUrl": "https://www.google.com/",
+      "matches": [
+        "https://www.google.com/*",
+        "https://google.com/*"
+      ],
+      "frames": "top",
+      "network": [],
+      "settingsUi": {
+        "statusLabels": {
+          "app": "Google mode",
+          "artist": "Result summary",
+          "track": "Search query"
+        }
+      },
+      "pageAccess": {
+        "url": true,
+        "queryParameters": [
+          "q",
+          "udm",
+          "tbm"
+        ],
+        "selectors": {
+          "googleApps": {
+            "selector": "#gbwa",
+            "read": "text"
+          },
+          "resultStats": {
+            "selector": "#main #result-stats",
+            "read": "text"
+          }
+        }
+      },
+      "entry": "activities/google/activity.js",
+      "metadata": "activities/google/metadata.json",
+      "sha256": "343c4af5f82ccf08d2c2e3170bd51b731beedeb2f3bd4f3ce55994d103154513",
+      "metadataSha256": "243e4a3c57b36ad7d23081a5e446fead10f2cdcee60d9b7a8c0b38f9a8a5879d",
+      "icon": "activities/google/icon.png",
+      "iconSha256": "6fae509b81bc94fef1b4ac2cdae8f1889df2da9f736f050cd32e337517494084"
+    },
     {
       "id": "prime-video",
       "name": "Prime Video",

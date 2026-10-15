@@ -78,4 +78,68 @@ try {
   await page.locator('.dv-player-fullscreen').evaluate(node => node.style.display = 'block');
   assert.equal((await sample()).call.operation, 'presence.clear');
   console.log('Browser fixture passed: real Prime selectors, accessibility-hidden video, matched artwork, disappearing controls, pause/seek and player close through the production collector and QuickJS.');
+
+  const googleMetadata = JSON.parse(await fs.readFile(path.join(root, 'activities/google/metadata.json'), 'utf8'));
+  const googleSource = await fs.readFile(path.join(root, 'activities/google/activity.js'), 'utf8');
+  const googleFixture = await fs.readFile(path.join(root, 'activities/google/tests/search.html'), 'utf8');
+  const googleCalls = [];
+  const googleErrors = [];
+  const google = await globalThis.ChudPresenceV2Engine.createActivityV2Sandbox({ source: googleSource,
+    request(operation, payload) {
+      if (operation === 'presence.report') normalizeActivityReport(payload.report, 2);
+      googleCalls.push({ operation, ...payload });
+      return { accepted: true };
+    }, onError(error) { googleErrors.push(String(error)); },
+  });
+  try {
+    await page.unroute('**/*');
+    await page.route('**/*', route => route.request().resourceType() === 'document'
+      ? route.fulfill({ status: 200, contentType: 'text/html', body: googleFixture }) : route.abort());
+    async function googleSample() {
+      const snapshot = await page.evaluate(access => PrimePageBroker.collectActivityV2Snapshot(access, document), googleMetadata.pageAccess);
+      assert.doesNotMatch(JSON.stringify(snapshot), /PRIVATE|UNSUBMITTED/);
+      const count = googleCalls.length;
+      assert.equal(google.update(snapshot), true);
+      for (let i = 0; i < 48; i++) await Promise.resolve();
+      assert.deepEqual(googleErrors, []);
+      assert.equal(googleCalls.length, count + 1);
+      return { snapshot, call: googleCalls.at(-1) };
+    }
+    await page.goto('https://www.google.com/search?q=hello+%26+%E7%8C%AB&tracking=PRIVATE');
+    await page.addScriptTag({ content: collector.outputFiles[0].text });
+    let result = await googleSample();
+    assert.equal(result.call.report.display.details, 'Searching for : hello & 猫');
+    assert.equal(result.call.report.display.state, 'About 4,820,000,000 results (0.22 seconds)');
+    await page.locator('#result-stats').evaluate(node => node.style.display = 'none');
+    assert.equal((await googleSample()).call.report.display.state, '');
+    await page.locator('#gbwa').evaluate(node => node.style.display = 'none');
+    await page.evaluate(() => history.pushState({}, '', '/search?q=updated&udm=2'));
+    result = await googleSample();
+    assert.equal(result.call.operation, 'presence.report');
+    assert.equal(result.call.report.display.name, 'Google Images');
+    assert.equal(result.call.report.display.details, 'Searching for : updated');
+    await page.locator('#gbwa').evaluate(node => node.style.display = 'block');
+    for (const [url, name] of [
+      ['/search?q=images&udm=2', 'Google Images'], ['/search?q=ai&udm=50', 'Google AI'], ['/', 'Google'],
+    ]) {
+      await page.evaluate(url => history.pushState({}, '', url), url);
+      result = await googleSample();
+      assert.equal(result.call.report.display.name, name);
+      assert.equal(result.call.report.display.state, '');
+    }
+    assert.equal(result.call.report.display.details, 'Homepage');
+    for (const url of ['/search?q=one&q=two', '/search?q=test&udm=50&udm=2', '/maps?q=test']) {
+      await page.evaluate(url => history.pushState({}, '', url), url);
+      assert.equal((await googleSample()).call.operation, 'presence.clear');
+    }
+    await page.evaluate(() => history.pushState({}, '', '/search?q=test'));
+    await page.locator('#gbwa').evaluate(node => node.style.display = 'none');
+    assert.equal((await googleSample()).call.operation, 'presence.clear');
+    await page.locator('#gbwa').evaluate(node => node.style.display = 'block');
+    await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
+    assert.equal((await googleSample()).call.operation, 'presence.clear');
+    await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' }));
+    assert.equal((await googleSample()).call.report.playback.position, 0);
+    console.log('Google browser fixture passed: production collector and QuickJS, submitted query, visible-only stats, modes/homepage, duplicate/mismatched routes, hidden readiness and visibility; no drafts, snippets or AI responses captured.');
+  } finally { google.dispose(); }
 } finally { sandbox.dispose(); await browser.close(); }
