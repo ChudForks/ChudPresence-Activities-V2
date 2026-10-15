@@ -1,0 +1,42 @@
+{
+  "repository": "ChudForks/ChudPresenceSolo-Chromium-Activity-Lab",
+  "revision": "9b26e3e6a1a8fec5511011018b43e109246a2f58",
+  "files": {
+    "ACTIVITY_API_V2.md": {
+      "source": "extension/ACTIVITY_API_V2.md",
+      "sha256": "57887f267eeff9b1ffed772f9311291e59766efcd6f7480397813606ce7b6918"
+    },
+    "schemas/activity-report.schema.json": {
+      "source": "schemas/activity-v2-report.schema.json",
+      "sha256": "ab7d8e10185002f17579126b5f49a1a12a1ea7ef26adaf73813fc478043f8efb"
+    },
+    "schemas/activity-api-v2.json": {
+      "source": "schemas/activity-api-v2.json",
+      "sha256": "55c51839ab50cb0306853b6055b5f8bd924a3d2283094533b193422f12b8c2aa"
+    },
+    "schemas/activity-v2.schema.json": {
+      "source": "schemas/activity-v2.schema.json",
+      "sha256": "b61ae1066cb00e635a7a76a146c38e491b1a17ffdb04014d172e24b80c1505a9"
+    },
+    "schemas/activity-api-v2.d.ts": {
+      "source": "schemas/activity-api-v2.d.ts",
+      "sha256": "c9c92440cf1d573f59da7cf1f9ad4d4f4874c5ab1f177488d4046554161b3d0c"
+    },
+    "sdk/activity-validator.js": {
+      "source": "extension/core/activity-validator.js",
+      "sha256": "2b6f4bd43b90766d72b39c02b4865978708980d367755b96b9463bf734426879"
+    },
+    "sdk/activity-settings.js": {
+      "source": "extension/core/activity-settings.js",
+      "sha256": "4ee6c9e8f0b9b1469d98e2443a25fa373cac81d66d68d92937707339a835259b"
+    },
+    "sdk/activity-contract.generated.js": {
+      "source": "extension/core/activity-contract.generated.js",
+      "sha256": "99b98bd600ac8086fbfbaa913c63c7beb474477a72986a79d99466bc84950206"
+    },
+    "sdk/activity-v2-page.js": {
+      "source": "extension/core/activity-v2-page.js",
+      "sha256": "398bc63740ce57e25f3d83a6dea49c6de8730682d808955d6d4ab0e7815a9ecc"
+    }
+  }
+}

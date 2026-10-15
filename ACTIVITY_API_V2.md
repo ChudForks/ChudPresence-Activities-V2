@@ -1,304 +1,327 @@
-# ChudPresence Activity API V2
+# Activity API v2
 
-V2 is the public, declarative Activity API introduced in the Chromium lab 2.0.0.
-Developers describe which media information to inspect. ChudPresence owns the
-JavaScript that reads those fields, samples the player, and submits presence.
-An installed V2 package contains no executable JavaScript.
+V2 keeps programmable JavaScript and V1-compatible presence reports while removing an
+Activity's direct access to the website and the browser. Set `apiVersion: 2` in
+`metadata.json` and ship `activity.js` as before. Load the files in the Library's
+Developer view. The v1 packages and canonical v1 contract remain supported.
 
-[V1](https://github.com/ChudForks/ChudPresence-Activities/blob/main/ACTIVITY_API.md) remains available for trusted first-party integrations and
-explicitly trusted local development. V2 does not expose V1's SDK or page bridge.
+This implementation is independent of the archived declarative V2 under
+`references/`. Activities contain JavaScript, including functions, closures,
+regular expressions, promises, and custom selection and formatting logic.
 
-## Quick start
+## Execution boundary
 
-Create a folder with the following two files. Optionally include `icon.png` for
-the Library card and declare `"icon": "icon.png"` in metadata.
+The trusted extension loads a pinned, locally bundled QuickJS WebAssembly
+interpreter inside a dedicated extension worker for each live Activity document.
+An offscreen extension document owns those workers; a separate v2 `USER_SCRIPT`
+world collects only approved page snapshots. Package JavaScript never enters
+the website's execution world. It executes inside the interpreter and has no browser `document`,
+`window`, `chrome`, `browser`, `navigator`, cookies, local/session storage,
+network APIs, DOM nodes, host functions, module loader, or WebAssembly API.
+`Function` and constructor chains create functions inside the guest interpreter.
+They cannot recover browser globals.
 
-`metadata.json`:
+The only native bridge accepts a bounded JSON string and returns a guest string.
+Async service results also cross as JSON. The guest never receives the extension
+ownership capability or another Activity's storage namespace. Source travels as
+data from the background to its worker, never evaluated by native browser
+JavaScript. The page broker's CSP denies native string evaluation, WASM
+compilation, and direct network connections. The extension's own policy allows
+locally bundled WASM; strict website policies cannot block interpreter startup.
+No new extension permissions are added.
+
+Each guest owns a separate WASM instance with a 32 MiB linear-memory ceiling;
+QuickJS heap/stack limits are 16 MiB/256 KiB. Each interpreter entry and promise
+drain has a 50 ms deadline, at most 256 pending jobs, 16 outstanding requests,
+and 30 requests per 10 seconds. Each entry includes its microtasks in the same
+budget. Execution and memory failures dispose the VM and clear its presence.
+Requests that exceed broker quotas are rejected.
+The parent additionally terminates a worker that fails to complete startup in
+five seconds or an update/promise resumption in two seconds, including native
+engine operations. At most 16 live v2 document sessions run per extension; idle
+workers expire after 120 seconds without snapshots. The shared offscreen document
+preserves the existing private Discord cleanup lifecycle. Workers never receive
+its Discord credentials. These safeguards are not an operating-system process
+quota; selector evaluation and aggregate browser memory remain browser-managed.
+
+## Declare page reads
+
+Page access defaults to none. All reads are fixed in package metadata and visible
+on the Activity's Library card. Package code cannot introduce new selectors at
+runtime. A metadata/source change goes through package installation again.
 
 ```json
 {
-  "id": "example-video",
+  "id": "example-video-v2",
   "name": "Example Video",
-  "description": "Show media playback from Example Video.",
+  "description": "Report playback from public player metadata.",
   "version": "1.0.0",
   "apiVersion": 2,
-  "minExtensionVersion": "2.0.0",
-  "matches": ["https://example.com/watch/*"],
-  "excludeMatches": ["https://example.com/watch/private/*"],
-  "entry": "activity.json"
-}
-```
-
-`activity.json`:
-
-```json
-{
-  "schemaVersion": 1,
-  "kind": "video",
-  "scope": "#player",
-  "fields": {
-    "title": {
-      "source": "dom.text",
-      "selectors": [".media-title", "h1"]
-    },
-    "creator": {
-      "source": "dom.attribute",
-      "selectors": [".media-creator"],
-      "attribute": "title"
+  "matches": ["https://example.com/*"],
+  "entry": "activity.js",
+  "pageAccess": {
+    "url": true,
+    "media": true,
+    "selectors": {
+      "title": { "selector": "main h1", "read": "text" },
+      "creators": { "selector": ".player .creator", "read": "text", "all": true },
+      "artwork": { "selector": "meta[property='og:image']", "read": "attribute", "attribute": "content" },
+      "episode": { "selector": "script[type='application/ld+json']", "read": "json", "path": ["episode"] },
+      "shadowTitle": { "selector": "site-player >>> .title", "read": "text" }
     }
-  },
-  "player": {
-    "adapter": "html-media",
-    "selectors": ["video", "audio"]
   }
 }
 ```
 
-Replace the example selectors with selectors for the actual website. The player
-and metadata must be descendants of the same narrow approved container. All
-values read from it may appear in Discord when sharing is enabled.
+`text` traverses public text, excluding forms, inputs, editables, hidden elements,
+scripts, styles, templates, and marked authentication/payment containers.
+`attribute` allows only `title`, `alt`, `aria-label`, `href`, `src`, `poster`,
+`content`, and `datetime`. URL attributes are HTTPS-only and lose credentials,
+query strings, and fragments. `content` is limited to known public social/title
+metadata, such as `og:image`; a CSRF meta element cannot provide its content.
 
-Open Activity Library, enable developer tools, select both JSON files, and click
-**Load local Activity**. Review the hosts, container, fields, and player selectors.
-**Approve installation** requests missing browser site permissions and approves
-the exact staged bytes. Chrome 138+ requires **Allow User Scripts** in extension
-details; earlier supported versions use Developer mode. This implementation uses
-`chrome.userScripts` to run its bundled collector.
+`json` reads only typed `application/json` or `application/ld+json` script blocks
+and requires an explicit nonempty own-property path. Credential keys and
+prototype paths are rejected, nested credential keys are omitted, and output is
+bounded. It does not execute script text or read arbitrary page globals.
+Recognizable credential strings are redacted from all string reads. This includes
+Bearer/JWT/Discord tokens and credential assignments; embedded URL queries and
+fragments are removed.
 
-A ready-to-load example is in the lab's `examples/v2/html-media/` directory.
+Selectors support combinators, classes, IDs, nested `:is`, `:where`, `:not`,
+`:has`, structural/nth pseudos, and `>>>` to traverse open shadow roots. Attribute
+predicates use a fixed public allowlist. `value`, `content`, arbitrary `data-*`,
+CSS escapes, and stateful pseudos are rejected. These restrictions also prevent
+probing a secret value by checking whether an element matches a selector.
 
-## Execution and data flow
+Each snapshot allows 32 declarations, 32 matches per declaration (`all: true`),
+128 successful element reads, 4,096 characters per string, 64 KiB of captured
+values, and 16 media elements. Missing/filtered scalar reads return `null`;
+`all` reads return arrays. JSON parsing, traversal depth, scanned candidates, and
+text traversal are bounded. Exhausted budgets can omit later values.
 
-```mermaid
-flowchart LR
-    A[Developer JSON] --> B[Validate and approve exact bytes]
-    B --> C[Bundled ChudPresence collector]
-    C --> D[Approved DOM fields and player snapshot]
-    D --> E[Validate document, generation and report]
-    E --> F[Core presence publisher]
-    F --> G[Discord when sharing is enabled]
+Media snapshots expose playback state and geometry, plus a sanitized poster:
+`currentTime`, `duration`, `paused`, `ended`, `playbackRate`, `muted`, `visible`,
+and `rect`. They omit signed playback sources. When `url` is declared,
+`page.info()` exposes `origin`, `pathname`, and the document's `visibilityState`
+(`visible`, `hidden`, or `prerender`). Visibility changes trigger an immediate
+snapshot, including when an earlier update is still in flight.
+
+For search/video routes, explicitly declare `queryParameters: ["q", "v"]` in
+`pageAccess` and read `page.info().query.q` or `.v`. Only the first value for each
+declared key is exposed (missing keys are `null`), with credential-pattern
+filtering. `page.info().queryDuplicates`, when present, lists only declared key
+names that occur more than once; additional values are never exposed. This works
+independently of `url: true`. Up to 16 unique public
+parameter names are allowed; credential/OAuth names such as `token`, `code`,
+`state`, `key`, and `SAMLResponse` are rejected. Undeclared query values and the
+URL fragment stay inaccessible.
+
+## Bind metadata to a native player (extension 2.0.2)
+
+Declare `media: true` and up to four `mediaScopes` to read public text or
+attributes from the nearest matching ancestor of each video/audio element:
+
+```json
+{
+  "media": true,
+  "mediaScopes": {
+    "card": {
+      "container": ".reel-card",
+      "ancestors": 16,
+      "exclude": ".application-root",
+      "selectors": {
+        "caption": { "selector": ".caption", "read": "text" },
+        "creator": { "selector": "header a", "read": "attribute", "attribute": "href" }
+      }
+    }
+  }
+}
 ```
 
-Package contents are parsed with `JSON.parse` and embedded as serialized data
-alongside bundled extension functions. They are never evaluated or interpolated
-into a function body. There are no developer callbacks or returned DOM objects.
+`media.getAll()` retains its existing DOM order and adds `readyState`,
+`visibleArea` (pixels clipped to the viewport), and `scopes` only when scopes
+are declared. For example, `player.scopes.card` is either `null`, or
+`{ reads: { caption: "Example", creator: "https://example.com/creator/" }, rejected: [] }`.
+Playback and scoped reads belong to the same native element; no DOM identity,
+node, persistent handle, page globals or execution capability crosses the sandbox.
 
-The collector samples once every two seconds, resolving current elements and
-checking route scope each time. It therefore handles DOM replacement and SPA
-navigation. Missing titles (except the Prime Video retention described below),
-missing/unready/ended players, excluded routes, and out-of-scope routes clear
-existing reports. Background timer throttling can delay
-sampling; this interval is not a timing guarantee.
+The broker walks at most 16 ancestors and stops before HTML, BODY, MAIN,
+`role="main"`, an excluded boundary or a hidden/sensitive container. The nearest
+matching container must contain exactly one native player, counting hidden
+players and players inside open shadow roots. Ambiguity fails closed. Reads
+are limited to that container's descendants, including explicitly declared open
+shadow traversal. Scoped JSON reads are not supported. `dir` joins the public
+selector-attribute allowlist for caption layouts; it is not a new readable attribute.
 
-Each report belongs to an enabled installation generation, top-frame document,
-and tab. The worker checks current host permission and rejects stale generations.
-Disable, uninstall, and revocation block publication. The collector removes its
-timers on teardown/document exit. Startup and extension updates restore approved
-stored configurations through the existing Activity Manager.
+Missing captures return `null` (or `[]` with `all`). Hidden, sensitive, oversized,
+out-of-boundary or budget-limited captures additionally list their name in
+`rejected`. A scalar uses its first matching element and does not skip an invalid
+first candidate. Scoped text rejects hidden/sensitive descendants rather than
+silently dropping them. Packages can therefore distinguish an absent caption
+from an invalid caption and clear when winning-card metadata is rejected.
+The ordinary public-string and URL sanitizers apply to every value.
 
-## Metadata
+All page and scoped declarations share the existing **32 captures, 128 reads
+and 64 KiB captured-value budget** per snapshot. Scoped work additionally shares
+512 selected candidates, 256 ancestor steps and 2048 inspected card descendants;
+these limits do not multiply per player. Native discovery retains the existing
+16-player cap. Scope budgets are spent on the largest visible players first;
+output media order stays unchanged. Packages should select their player before
+validating its metadata and clear on an invalid winner. They must not select a
+smaller player merely because its metadata is complete.
 
-Required: `id`, `name`, `description`, `version`, `apiVersion`, `matches`, `entry`.
-`apiVersion` must be `2`; `entry` must be `activity.json`.
+Scopes are fixed metadata, displayed in the Library's declared-page-access
+review, and supplied through normal package installation. Adding them requires
+reimporting the updated package. Existing packages gain no scoped reads.
 
-| Field | Contract |
-| --- | --- |
-| `id` | 2–64 lowercase letters, digits or hyphens, starting with a letter or digit. |
-| `name`, `description` | Non-empty text, at most 80 and 500 characters respectively. |
-| `version`, `minExtensionVersion` | Semantic versions; minimum extension version is optional. |
-| `matches` | 1–32 unique exact public HTTPS host patterns; paths may use `*`. |
-| `excludeMatches` | Up to 32 patterns with the same restrictions. |
-| `frames` | Omitted or `top`; child-frame execution is unavailable. |
-| `icon` | Omitted or `icon.png`; validated PNG up to 256 KB. |
+## Write an Activity
 
-Optional discovery fields: `author`, `contributors`, `category`, `defaultMediaKind`,
-`aliases`, `tags`, `repository`, `homepage`, `serviceUrl`, `settingsUi.statusLabels`.
-Their bounds are in the metadata schema. Discovery URLs are static metadata, not
-output destinations for extracted values. Author fields do not establish trust.
+The host updates the snapshot approximately every two seconds, including SPA
+route changes. Chromium can throttle background timers. Keep callbacks short;
+select and format data with ordinary JavaScript. For example:
 
-Unknown fields fail closed. `network`, `executionWorld`, custom `settings`,
-`presence`, and capability declarations are not accepted. Wildcard hosts, IP
-literals, local names, HTTP, ports in match patterns, Discord domains, and
-extension/internal URLs are rejected. Host validation does not resolve DNS or
-establish a general network firewall.
-
-Chrome grants permissions for an entire origin. The collector and worker enforce
-the narrower Activity path scope separately.
-
-## Configuration and field rules
-
-`schemaVersion: 1` identifies the configuration format. It is separate from the
-API's `apiVersion: 2` and the package's semantic version.
-
-`kind`: `video`, `movie`, `episode`, `song`, `stream`, `game`, or `generic`.
-This initial implementation requires an HTML audio/video player for every kind.
-
-`scope`: a container selector containing an ID or class. The first visible,
-permitted container among up to eight matches is selected. All field/player
-queries operate inside that container.
-
-`fields`: `title` is required. Optional text fields are `subtitle`, `artist`,
-`album`, `series`, `creator`, `channel`, `category`, `game`, and `playlist`.
-Numerical season/episode extraction is available only through the bundled
-Prime Video details mode below.
-
-| Rule option | Behavior |
-| --- | --- |
-| `source: "dom.text"` | Read bounded `textContent` only after the element and its descendants pass visibility checks. |
-| `source: "dom.attribute"` | Read only `title`, `aria-label`, or `alt`. |
-| `selectors` | One to four unique fallback selectors, tried in order. |
-| `attribute` | Required for attribute reads; forbidden for text reads. |
-| `removePrefix`, `removeSuffix` | Optional non-empty literal strings, at most 64 characters each. |
-
-Whitespace is collapsed and trimmed automatically. Prefix/suffix removal is
-literal, followed by trimming. Missing optional values are omitted. Missing title
-means no presence. No regex, expression, callback, loop, or method name is accepted.
-
-Selectors support tag, ID, and class compounds, with descendant/child combinators:
-`.media-title`, `h1.title`, `#metadata > .creator span`. Attribute/pseudo selectors,
-escapes, wildcards, sibling traversal, and comma lists are forbidden. Use the
-fallback array. Limit: 256 characters and eight compound parts per selector.
-
-Readable elements are headings, spans, paragraphs, divs, links, strong/bold,
-emphasis/italic, small text, and images. Reads exclude root `html`/`body`, sensitive
-elements/ancestors such as forms, inputs and editable content, hidden elements,
-and subtrees containing sensitive nodes. Targets may have at most 16 descendants.
-If any descendant fails the visibility checks (CSS `display: none`, hidden or
-collapsed `visibility`, zero opacity, `content-visibility: hidden`, or no layout
-rectangles), the entire field is skipped before reading its text or attribute.
-Visible nested formatting is supported; use a narrower selector for markup that
-mixes visible and hidden content. A rejected title clears presence, and a rejected
-optional field is omitted.
-Raw values over 1,024 characters are skipped; accepted values are capped at 256.
-At most eight candidates per selector are considered.
-
-## Player adapter
-
-`player` accepts `adapter: "html-media"` and one to four fallback `selectors`.
-The first visible, permitted, ready audio/video descendant provides:
-
-- `state`: `playing` or `paused`; ended playback clears presence.
-- `position`, `duration`: seconds, bounded to one year. Unknown/infinite duration becomes zero.
-- `live`: true when duration is infinite.
-- `rate`: playback rate bounded to 0–16.
-
-The `html-media` adapter does not read media resource URLs or arbitrary site
-JavaScript objects/methods.
-The bundled `prime-video` adapter supports Prime's modern overlay player on
-`primevideo.com` / `www.primevideo.com` and Amazon US `/gp/video/` pages. It
-requires `kind: "video"`, `scope: ".dv-player-fullscreen"`, and player selectors
-`[".atvwebplayersdk-video-surface video"]`. Its only fields are `title` from
-`.atvwebplayersdk-title-text` and optional `subtitle` from
-`.atvwebplayersdk-episode-info`, both `dom.text` with no transforms. Other
-containers, fields or selectors are rejected for this adapter.
-
-Prime marks its visible video `aria-hidden`; only that video's own accessibility
-marker is exempted. Hidden ancestors and sensitive text remain excluded. When
-Prime removes the controls, the adapter retains already-read visible metadata
-for the same container, player, source, duration and route. Present but rejected
-metadata never uses this fallback. A rejected title clears the retained metadata;
-a rejected subtitle is omitted from both the current report and its retained copy.
-End/load/empty events and identity changes
-invalidate retention. Source URLs are compared only locally for invalidation and
-are never report values or request destinations. Installing mid-playback may
-require showing the controls once so the title can be sampled.
-
-Prime Video may additionally declare `player.metadata: "prime-video-details"`.
-This opt-in mode parses the player episode line into an episode name, series,
-season and episode (numbers bounded to 0–10000). Episode reports use `kind:
-"episode"`; core shows the clean episode title first and the series second.
-Season/episode numbers remain in media metadata and artwork hover text. Reports
-without a recognized episode keep their configured video kind.
-
-Details mode also inspects fixed public title headings, episode headings,
-play-link labels and images under `#main`. Artwork requires the detail-page
-series to match the player. Episode thumbnails also require matching episode
-name and play-link season/episode numbers; matching show art is the fallback.
-Only HTTPS `/images/S/pv-target-images/` image paths on `m.media-amazon.com`
-and Amazon's `images-na`, `images-eu` or `images-fe.ssl-images-amazon.com`
-hosts are accepted, with no credentials, ports, queries or fragments. Images
-and headings must pass visibility/sensitive-ancestor checks. No detail-page
-requests, arbitrary destinations or package parsing expressions are supported.
-Approval describes these additional reads and outputs; older packages do not
-enable them automatically.
-
-Other custom players, cross-frame players, ad detection, general artwork, display templates,
-and presence links require future bundled features/adapters. There is no package
-function or code string escape hatch.
-
-## Publication and privacy boundary
-
-The bundled collector uses only `presence.report` and `presence.clear`. Reports
-contain the approved `kind`, declared `media` text fields, and bounded `playback`.
-Unknown media fields, `display`, buttons, and URL-bearing fields are rejected.
-The Prime Video details mode additionally permits derived series/season/episode
-fields and `artwork.large`/`largeText` with the fixed Amazon URL restrictions
-above. The core derives formatting and applies user sharing/preferences.
-
-V2 offers no package JavaScript, requests, page execution, Activity storage API,
-cross-Activity reads, OAuth access, or browser API access. The USER_SCRIPT world's
-`connect-src 'none'` is additional defense; the execution boundary is that all
-executed code is bundled ChudPresence code.
-
-This controls execution and outbound destinations. It cannot automatically prove
-that author-selected text is public media metadata. A selector could identify
-private text on an approved page. Review the exact declarations and approve only
-media-related reads. Schema validation alone does not establish their meaning.
-
-## Approval, updates and recovery
-
-Every installation/update requires the Library review dialog. The approval digest
-includes normalized metadata, available raw metadata bytes, configuration bytes,
-icon, source type, and repository provenance. Changed bytes invalidate approval.
-Installed configuration/metadata/icon hashes are checked before registration and
-on restoration. Changed packages require a higher semantic version and fresh
-approval; changing only build metadata is not a version increase.
-
-V2 cannot replace V1 with the same ID, and V1 cannot replace V2. V2 cannot reuse
-an ID from a different source type or repository. Uninstall first or use a new
-ID. Local packages are user-selected files, not authenticated publisher identities.
-V2 updates preserve user preferences and a disabled Activity's disabled state.
-Local V1 loading requires the separate **Run trusted V1 JavaScript** action.
-
-Declining approval leaves the current version untouched. Registration/storage
-failure attempts to restore the previous approved version. Startup reconciliation
-uses persisted installed records. This is the existing recovery model, not a new
-transaction journal or a guarantee of atomic browser execution switching.
-
-## Developer tooling and distribution
-
-From the separate `ChudPresence-Activities-V2` checkout:
-
-```sh
-node tools/chudpresence.mjs activity new my-player
-node tools/chudpresence.mjs activity validate my-player
-node tools/chudpresence.mjs activity build my-player
+```js
+ChudPresence.onUpdate(async () => {
+  const title = ChudPresence.page.read('title') || ChudPresence.page.read('shadowTitle');
+  const player = ChudPresence.media.getAll().find(media => media.visible && !media.ended);
+  if (!title || !player) { await ChudPresence.clear(); return; }
+  const artwork = ChudPresence.page.read('artwork');
+  await ChudPresence.report({
+    kind: 'video',
+    media: { title },
+    playback: {
+      state: player.paused ? 'paused' : 'playing',
+      position: player.currentTime,
+      duration: player.duration,
+      rate: player.playbackRate
+    },
+    ...(artwork ? { artwork: { large: artwork } } : {})
+  });
+});
 ```
 
-`new` creates a V2 JSON package by default. V1 authoring remains in the separate
-`ChudPresence-Activities` repository. V2 `build` validates JSON
-and refreshes catalog hashes; it emits no JavaScript. V2 packages cannot contain
-`activity.js`. Edit JSON, increase the version, select the files again, and approve
-the update. JSON packages require no watch compilation.
-Authors may add their own fixture tests under `tests/`.
+`onUpdate(callback)` also passes the current deeply frozen JSON snapshot to the
+callback and returns an unsubscribe function. Snapshot reads are synchronous.
+Settings, storage, reports, clearing, logging, and network services are async:
 
-Editor/TypeScript support: `schemas/activity-v2-metadata.schema.json`,
-`schemas/activity-v2.schema.json`, and `@chudpresence/activity-sdk-v2/types`.
-Types describe configuration, not runtime functions. Runtime validators enforce
-extra restrictions beyond JSON Schema; validate through the CLI before publishing.
-Use editor schema associations; `$schema` is not an accepted package field.
+| API | Result |
+| --- | --- |
+| `ChudPresence.apiVersion` | `2` |
+| `page.read(name)` / `page.info()` / `media.getAll()` | Current snapshot data |
+| `report(report)` / `clear()` | Validated V1-compatible reports and V2 presentation options / clear |
+| `settings.get(id)` / `settings.getAll()` | Activity-defined settings |
+| `storage.get(key)` / `set(key, value)` / `remove(key)` / `clear()` | Activity-scoped JSON storage, 64 KiB total |
+| `net.fetch(url, options)` | `{ status, ok, contentType, data }` |
+| `log.debug/info/warn/error(...args)` | Redacted local diagnostics, up to eight values and 4 KiB |
 
-Canonical contract/validator: the Activities checkout's `schemas/activity-api-v2.json`
-and `schemas/activity-api-v2.js`. Run `node tools/generate-api-v2.mjs` to regenerate
-schemas, declarations, and lab copies. Metadata and configuration are each limited
-to 64 KB; normalized reports retain the existing 16 KB limit.
+V2 reports additionally accept `display.name` (a nonempty name up to 256
+characters) to label modes of one Activity. `kind: 'generic'` page activities can
+set `playback.elapsed: true` with `position` in seconds to show an elapsed timer
+without a Live label. They must omit duration (or use zero) and cannot set
+`live: true`. Their empty `display.state` stays omitted in Discord. For example:
 
-The official `ChudForks/ChudPresence-Activities-V2` catalog distributes V2 JSON
-packages through immutable revision downloads and SHA-256 verification. Discover
-combines this catalog with the separate V1 catalog while preserving repository
-provenance. Custom repository onboarding is not implemented; third-party authors
-can load locally or submit to the V2 repository.
+```js
+await ChudPresence.report({
+  kind: 'generic', media: { title: 'Submitted query' },
+  display: { name: 'Search Images', details: 'Searching for : Submitted query', state: '', statusDisplay: 'name' },
+  playback: { state: 'playing', elapsed: true, position: 12 }
+});
+```
 
-Keep this a fixed extraction format. Arbitrary expressions, code strings, loops,
-or custom method dispatch would require another security/policy assessment.
-Chrome restricts remote complex-command interpreters: [MV3 requirements](https://developer.chrome.com/docs/webstore/program-policies/mv3-requirements).
+Use guest `Date.now()` and a closure to measure the current page session, resetting
+it when query, mode, readiness or visibility changes. These fields add no page or
+browser authority. Mode names and elapsed timers remain V2-only.
+
+Extension **2.0.3** also adds shared V1/V2 presentation controls:
+`display.statusDisplayOverride: 'name'` forces the compact status to show the
+application/mode name even when the saved preference selects a media line.
+The other accepted values are `details` and `state`. `display.hideState: true`
+omits the second text line and its link, including fallback text and Live/Paused
+markers. Both options are per-report and opt-in; omitting them on a subsequent
+playback report restores normal formatting and the saved preference.
+They do not alter saved settings or bypass artwork/button preferences.
+Packages using them should require `minExtensionVersion: '2.0.3'`.
+
+```js
+await ChudPresence.report({
+  kind: 'generic', media: { title: 'Browsing Example' },
+  display: { details: 'Browsing Example', statusDisplayOverride: 'name', hideState: true },
+  artwork: { large: 'https://example.com/logo.png', largeText: 'Example' },
+});
+```
+
+### Presence during navigation
+
+Starting in extension 2.0.1, a V2 package may declare
+`"presence": { "kind": "generic", "navigationGraceMs": 4000 }` in metadata.
+The optional grace is an integer from **0 to 5000 ms**, defaulting to zero.
+The same metadata option is available to V1 packages starting in extension
+**2.0.4**, with the same bounds and destination checks.
+The extension retains the outgoing presence for at most that duration when a
+top-level link, form submission or other Navigation API event identifies a new
+document within the package's declared matches (and outside its exclusions).
+A replacement report cancels the deadline and updates the presence directly.
+Repeated unload signals do not extend it. Without a valid navigation hint, the
+existing immediate document-exit cleanup remains in force.
+
+The outgoing guest is stopped immediately; this option delays only its presence
+removal. Tab removal overrides the grace immediately, including if the outgoing
+document has already been retired. Activity teardown, disabling sharing, and a
+closing/failure clear also bypass the pending navigation deadline. Late old
+documents and canceled deadlines cannot erase replacement reports. The browser
+close backup retains its existing immediate cleanup behavior.
+
+This is an extension-enforced metadata preference, not a guest timer or an
+arbitrary delay argument to `clear()`. In-page DOM loading gaps can be handled
+inside the Activity using short, bounded retention across `onUpdate` snapshots.
+An unsupported route or hidden page should still clear rather than retaining
+stale content indefinitely.
+
+The network broker retains v1's declared HTTPS path/origin permissions, user host
+permission checks, GET/POST support, limited headers/body/response sizes,
+concurrency bounds, and timeouts. Browser credentials are omitted, redirects
+are rejected, and no referrer is sent. Discord endpoints remain reserved for
+extension core. Activities supply their own request data; user/extension login
+credentials are never supplied by the broker. Anonymous network results are
+still untrusted external data. Prefer declaring narrow network paths.
+
+No guest timers are installed; updates are host-controlled. Save long-lived
+state in scoped storage. Disabling, removing, reloading, leaving the matched
+route, destroying the document, or exhausting execution limits tears down the
+guest. A failed guest stays stopped until an explicit reload or a new document;
+polling does not retry failing source. Storage survives updates. V1-specific `page.execute`, direct DOM access,
+and native lifecycle/navigation helpers require migration to snapshots and
+`onUpdate`. There is no opt-in switch to re-enable native page execution in v2.
+
+For custom players, select public DOM/JSON metadata, open shadow roots, native
+media state, and anonymous API data, then combine them in JavaScript. If a site
+requires a new protected capability, extend the trusted broker with a narrow,
+reviewed data operation rather than adding an arbitrary-code bridge. This keeps
+package logic flexible without granting access to the site's credential stores.
+
+## Security limits and validation
+
+This separates code execution from page authority; it cannot classify every
+piece of page data. A website can display a credential as ordinary public text,
+use an unrecognized field name, or put secrets in URL paths. An Activity can
+publish or transmit data it is allowed to read, including private visible text.
+Filtering is defense in depth, not proof that arbitrary selected data is public.
+Review declarations and install packages you trust with those selected fields.
+V1 retains its broader trusted-code model, so installing V1 alongside V2 does
+not sandbox the V1 Activity. Browser/WASM/QuickJS vulnerabilities remain part of
+the trusted computing base; keep pinned dependencies reviewed and updated.
+
+The JSON contracts are in `schemas/activity-api-v2.json` and
+`schemas/activity-v2.schema.json`; the V2 report schema is
+`schemas/activity-v2-report.schema.json`. TypeScript declarations are in
+`schemas/activity-api-v2.d.ts`. The runtime additionally validates selector
+grammar, key safety, byte budgets, and DOM context; schema validation alone is
+insufficient. Generate contracts with `node scripts/generate-v2-contract.mjs` and
+the locally embedded VM with `npm run build:v2-engine`.
+
+Run `npm ci`, `npm run check`, `npm test`, and `npm run build`. The optional
+`node scripts/test-v2-browser.mjs` checks the actual unpacked extension, real
+userScripts/WASM execution, private-data exclusions, guest escapes, storage,
+presence, and interruption using an isolated browser profile and synthetic
+HTTPS fixtures. It needs Playwright; see its environment overrides in the script.

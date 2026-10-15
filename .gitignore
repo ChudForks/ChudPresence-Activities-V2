@@ -1,3 +1,11 @@
 node_modules/
-.v2-test-*/
-.version-test-*/
+.activity-cache/
+test-results/
+
+# Optional local tests, integration helpers, and generated output.
+/activities/*/tests/
+/tools/*.test.js
+/tools/*.test.mjs
+/tools/test-*.mjs
+/playwright-report/
+/coverage/

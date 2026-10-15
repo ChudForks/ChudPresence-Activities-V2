@@ -1,72 +1,34 @@
 # ChudPresence Activities V2
 
-Declarative Activity API V2 packages and their discovery catalog. Prime Video
-is the first package, at version **1.1.0**. Each activity contains `metadata.json`
-and `activity.json`, with an optional `icon.png` and package tests.
+Build programmable Activities for ChudPresence with the sandboxed Activity API V2. This repository contains the official V2 package catalog, JavaScript authoring tools, examples, and API documentation.
 
-V2 describes bounded media selectors and a player adapter bundled with the
-extension. Packages cannot supply JavaScript, request network access, or add a
-custom adapter. The extension presents the extraction summary for approval when
-an activity is installed or updated.
+## Activities
 
-This repository is independent of the trusted V1 activity repository,
-[ChudPresence-Activities](https://github.com/ChudForks/ChudPresence-Activities).
-The Chromium lab keeps both repositories as independent nested Git checkouts,
-ignored by the lab and excluded from its extension build. You can clone, validate,
-and contribute to this repository on its own; the lab is not required.
+| Activity | What it does |
+| --- | --- |
+| [Prime Video](activities/prime-video/README.md) | Shows movie or episode details and playback state. |
+| [Google](activities/google/README.md) | Shows browsing and search activity across Google pages. |
+| [Instagram](activities/instagram/README.md) | Shows browsing, Stories, profile, and selected Reels activity. |
 
-## Develop an activity
+## Create an Activity
 
-Use Node.js 20 or later:
+Use Node.js 20 or newer. Install the development dependencies, generate a starter, edit its package metadata and TypeScript source, then build and validate it:
 
 ```sh
 npm ci
-npm run activity -- new my-service
-npm run activity -- validate my-service
-npm run activity -- test my-service
-npm run activity -- build my-service
+npm run activity -- new example
+# Edit activities/example/metadata.json and activities/example/src/index.ts.
+npm run activity -- build example
+npm run activity -- validate example
+npm run check
 ```
 
-`new` always creates a V2 JSON package. Edit the exact HTTPS matches in
-`metadata.json` and the selectors in `activity.json`. `build` validates the
-package and updates `catalog.json`; JSON needs no compilation. `dev` validates
-the package and explains the reload workflow. Increment the package's semantic
-version when its metadata, configuration, or icon changes.
+The build bundles the starter into `activity.js` and refreshes the catalog. You can also write `activity.js` directly. Read [Activity API V2](ACTIVITY_API_V2.md) for the package format, available APIs, page-data declarations, security model, limits, and full authoring details.
 
-Load both JSON files through **Activity Library → Developer → Load local
-Activity**, review the extraction summary, and approve installation. Reimport
-both files after editing to approve an update. The Prime Video package requires
-the Chromium lab's bundled `prime-video` adapter and the extension version
-declared in its metadata.
+## Try an Activity in ChudPresence
 
-See [the V2 authoring guide](ACTIVITY_API_V2.md) and
-[Prime Video's package notes](activities/prime-video/README.md) for the current
-contract and its supported behavior.
+V2 packages in this repository are not currently listed in the extension's Discover catalog. To try one locally, open **Activity Library → Developer → Load local Activity** in ChudPresence and select the package's `metadata.json`, `activity.js`, and icon if it declares one. Review the requested website access and page-data declarations before loading the Activity.
 
-## Contract, types, and catalog
+## Sandbox and permissions
 
-`schemas/activity-api-v2.json` is the authoritative V2 contract. Its generated
-schemas, TypeScript declarations, and V2-only catalog schema are checked in.
-`schemas/activity-api-v2.js` is the standalone validator. The generator checks
-its constants against the contract. TypeScript tools can import
-`ActivityV2Metadata` and `ActivityV2Configuration` from
-`@chudpresence/activity-sdk-v2/types`.
-
-```sh
-npm run check:contract
-npm run check:catalog
-npm run typecheck
-npm test
-npm run check:versions
-```
-
-After changing the contract, run `node tools/generate-api-v2.mjs`. Within the
-Chromium lab checkout, the generator also synchronizes the lab's schema and
-validator copies. In a standalone checkout it only manages this repository.
-After changing a package, run `npm run build:catalog`. Catalog hashes use the LF
-text bytes served by Git, including on Windows.
-
-The version gate compares package changes with a pull request's base, the prior
-push revision, or `HEAD^`. An initial commit has no previous package versions
-and skips that comparison. Use `--base=<ref>` with
-`node tools/check-version-bumps.mjs` to select a comparison explicitly.
+V2 package code runs in an isolated JavaScript sandbox. It does not get direct access to the page DOM or browser APIs. An Activity can read only the page data and media snapshots declared in its metadata, and it can report presence through the scoped V2 API. See [Activity API V2](ACTIVITY_API_V2.md) for the full security and permission model.

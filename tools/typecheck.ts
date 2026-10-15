@@ -1,28 +1,21 @@
-import type { ActivityV2Configuration, ActivityV2Metadata } from '@chudpresence/activity-sdk-v2/types';
+import type { ActivityV2API, ActivityV2Metadata, ActivityReport } from '@chudpresence/activity-sdk-v2/types';
 
 export const metadata: ActivityV2Metadata = {
-  id: 'typecheck-sample',
-  name: 'Typecheck sample',
-  description: 'Checks the generated V2 metadata declarations.',
-  version: '1.0.0',
-  apiVersion: 2,
-  matches: ['https://example.com/*'],
-  entry: 'activity.json',
+  id: 'sdk-sample', name: 'SDK sample', description: 'Checks V2 declarations.',
+  version: '1.0.0', apiVersion: 2, entry: 'activity.js', matches: ['https://example.com/*'],
+  pageAccess: { media: true, selectors: { title: { selector: 'h1', read: 'text' } },
+    mediaScopes: { card: { container: '.card', ancestors: 16, selectors: { caption: { selector: '.caption', read: 'text' } } } } }
 };
+export function register(api: ActivityV2API) {
+  return api.onUpdate(async () => {
+    const title = api.page.read('title');
+    if (typeof title !== 'string') { await api.clear(); return; }
+    const report: ActivityReport = { kind: 'video', media: { title } };
+    await api.report(report);
+  });
+}
 
-export const configuration: ActivityV2Configuration = {
-  schemaVersion: 1,
-  kind: 'video',
-  scope: '#player',
-  fields: { title: { source: 'dom.text', selectors: ['.media-title'] } },
-  player: { adapter: 'html-media', selectors: ['video'] },
+export const browsingReport: ActivityReport = {
+  kind: 'generic', media: { title: 'Browsing example' },
+  display: { details: 'Browsing example', statusDisplayOverride: 'name', hideState: true },
 };
-
-// V1 packages and executable sources cannot be represented by the V2 types.
-// @ts-expect-error V2 metadata requires apiVersion 2.
-const executableApi: ActivityV2Metadata['apiVersion'] = 1;
-// @ts-expect-error V2 has a fixed JSON entry point.
-const executableEntry: ActivityV2Metadata['entry'] = 'activity.js';
-// @ts-expect-error Only bundled player adapters are supported.
-const customAdapter: ActivityV2Configuration['player']['adapter'] = 'custom-script';
-void [executableApi, executableEntry, customAdapter];

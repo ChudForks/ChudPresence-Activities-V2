@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "skipLibCheck": true,
-    "lib": ["ES2022", "DOM"],
+    "skipLibCheck": false,
+    "lib": ["ES2020"],
     "noEmit": true
   },
-  "include": ["tools/typecheck.ts"]
+  "include": ["activities/**/*.ts", "tools/typecheck.ts"]
 }

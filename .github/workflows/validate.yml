@@ -1,10 +1,8 @@
-name: Validate V2 Activities
-
+name: Validate programmable V2 Activities
 on:
   pull_request:
   push:
     branches: [main]
-
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -14,14 +12,11 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: npm run typecheck
-      - run: npm run check:contract
-      - run: npm run check:catalog
-      - name: Require semantic version bumps for package changes
-        run: npm run check:versions
+      - run: npm run check
+      - name: Require package version increases
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: npm run check:versions

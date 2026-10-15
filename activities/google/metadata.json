@@ -1,0 +1,31 @@
+{
+  "id": "google",
+  "name": "Google",
+  "description": "Show the Google homepage, Search, Images and AI Mode with the submitted query, visible search statistics and elapsed time.",
+  "version": "2.0.1",
+  "apiVersion": 2,
+  "minExtensionVersion": "2.0.1",
+  "author": { "name": "ChudPresence" },
+  "category": "utilities",
+  "defaultMediaKind": "generic",
+  "presence": { "kind": "generic", "navigationGraceMs": 4000 },
+  "aliases": ["Google Search", "Google Images", "Google AI"],
+  "tags": ["search", "images", "ai"],
+  "serviceUrl": "https://www.google.com/",
+  "matches": ["https://www.google.com/*", "https://google.com/*"],
+  "entry": "activity.js",
+  "icon": "icon.png",
+  "frames": "top",
+  "network": [],
+  "settingsUi": {
+    "statusLabels": { "app": "Google mode", "artist": "Result summary", "track": "Search query" }
+  },
+  "pageAccess": {
+    "url": true,
+    "queryParameters": ["q", "udm", "tbm"],
+    "selectors": {
+      "googleApps": { "selector": "#gbwa", "read": "text" },
+      "resultStats": { "selector": "#main #result-stats", "read": "text" }
+    }
+  }
+}

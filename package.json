@@ -3,27 +3,22 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Tooling and catalog for declarative ChudPresence Activity API V2 packages.",
+  "description": "Programmable sandboxed Activity API V2 packages and authoring tools.",
   "types": "./schemas/activity-api-v2.d.ts",
-  "exports": {
-    "./types": "./schemas/activity-api-v2.d.ts"
-  },
-  "bin": {
-    "chudpresence": "tools/chudpresence.mjs"
-  },
+  "exports": { "./types": "./schemas/activity-api-v2.d.ts" },
+  "bin": { "chudpresence-v2": "tools/chudpresence.mjs" },
   "scripts": {
     "activity": "node tools/chudpresence.mjs activity",
-    "build:catalog": "node tools/build-catalog.mjs",
-    "check:contract": "node tools/generate-api-v2.mjs --check",
+    "build": "node tools/build-catalog.mjs",
+    "check": "npm run typecheck && npm run check:contract && npm run check:catalog",
+    "check:contract": "node tools/check-contract.mjs",
     "check:catalog": "node tools/build-catalog.mjs --check",
     "check:versions": "node tools/check-version-bumps.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --test"
+    "test": "node tools/run-tests.mjs",
+    "test:extension": "node tools/test-extension.mjs",
+    "test:browser": "node tools/test-browser.mjs && node tools/test-instagram-browser.mjs"
   },
-  "devDependencies": {
-    "typescript": "^7.0.2"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+  "devDependencies": { "esbuild": "0.25.12", "typescript": "7.0.2" },
+  "engines": { "node": ">=20" }
 }

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ACTIVITY_SEMVER_PATTERN } from '../schemas/activity-api-v2.js';
+import { ACTIVITY_SEMVER_PATTERN } from '../sdk/activity-contract.generated.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -44,29 +44,21 @@ export function compareVersions(left, right) {
 
 async function main() {
   const suppliedBase = process.argv.find((argument) => argument.startsWith('--base='))?.slice('--base='.length);
-  const eventBase = process.env.GITHUB_EVENT_BEFORE;
+  const eventBefore = process.env.GITHUB_EVENT_BEFORE;
+  const eventBase = eventBefore && !/^0+$/.test(eventBefore) ? eventBefore : '';
   const pullRequestBase = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : '';
-  const baseRef = suppliedBase || (eventBase && !/^0+$/.test(eventBase) ? eventBase : pullRequestBase) || 'HEAD^';
-  // First publication establishes the baseline. An explicitly supplied ref or
-  // CI base must still resolve so a typo cannot silently disable the gate.
+  const baseRef = suppliedBase || eventBase || pullRequestBase || 'HEAD^';
   if (!suppliedBase && !eventBase && !pullRequestBase) {
-    const previousCommit = spawnSync('git', ['rev-parse', '--verify', 'HEAD^'], { cwd: root, encoding: 'utf8' });
-    if (previousCommit.status !== 0) {
-      const history = git('rev-list', '--count', 'HEAD');
-      if (history === '1') {
-        process.stdout.write('Initial commit: no previous Activity versions to compare.\n');
-        return;
-      }
+    const parent = spawnSync('git', ['rev-parse', '--verify', 'HEAD^'], { cwd: root });
+    if (parent.status !== 0) {
+      console.log('Initial repository: no previous package versions to compare.');
+      return;
     }
-  }
-  if (!suppliedBase && eventBase && /^0+$/.test(eventBase) && !pullRequestBase && git('rev-list', '--count', 'HEAD') === '1') {
-    process.stdout.write('Initial commit: no previous Activity versions to compare.\n');
-    return;
   }
   const base = git('merge-base', baseRef, 'HEAD');
   const changed = git('diff', '--name-only', `${base}..HEAD`, '--', 'activities')
     .split(/\r?\n/)
-    .filter((path) => /^activities\/[^/]+\/(?:activity\.json|metadata\.json|icon\.png)$/.test(path));
+    .filter((path) => /^activities\/[^/]+\/(?:activity\.js|metadata\.json|icon\.png)$/.test(path));
   const activityIds = new Set(changed.map((path) => path.split('/')[1]));
   const failures = [];
 
@@ -78,12 +70,8 @@ async function main() {
       continue;
     }
     let current;
-    try {
-      current = JSON.parse(await fs.readFile(new URL(`../activities/${id}/metadata.json`, import.meta.url), 'utf8'));
-    } catch (error) {
-      if (error.code === 'ENOENT' && !git('ls-tree', '--name-only', 'HEAD', `activities/${id}/metadata.json`)) continue;
-      throw error;
-    }
+    try { current = JSON.parse(await fs.readFile(new URL(`../activities/${id}/metadata.json`, import.meta.url), 'utf8')); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
     if (compareVersions(current.version, previous.version) <= 0) {
       failures.push(`${id}: package files changed, so version must increase above ${previous.version} (currently ${current.version}).`);
     }

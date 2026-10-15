@@ -1,15 +1,24 @@
 {
   "id": "prime-video",
   "name": "Prime Video",
-  "description": "Show Prime Video's series, episode name and numbers, matching preview artwork, playback state and progress.",
-  "version": "1.1.0",
+  "description": "Show Prime Video movies and episodes, matching artwork, playback state and progress.",
+  "version": "2.0.0",
   "apiVersion": 2,
   "minExtensionVersion": "2.0.0",
-  "author": { "name": "ChudPresence" },
+  "author": {
+    "name": "ChudPresence"
+  },
   "category": "video",
   "defaultMediaKind": "video",
-  "aliases": ["Amazon Prime Video", "Amazon Video"],
-  "tags": ["movies", "tv", "streaming"],
+  "aliases": [
+    "Amazon Prime Video",
+    "Amazon Video"
+  ],
+  "tags": [
+    "movies",
+    "tv",
+    "streaming"
+  ],
   "serviceUrl": "https://www.primevideo.com/",
   "matches": [
     "https://www.primevideo.com/*",
@@ -17,8 +26,168 @@
     "https://www.amazon.com/gp/video/*",
     "https://amazon.com/gp/video/*"
   ],
-  "entry": "activity.json",
+  "entry": "activity.js",
+  "icon": "icon.png",
+  "frames": "top",
+  "network": [],
   "settingsUi": {
-    "statusLabels": { "app": "Prime Video", "artist": "Title", "track": "Episode" }
+    "statusLabels": {
+      "app": "Prime Video",
+      "artist": "Title",
+      "track": "Episode"
+    }
+  },
+  "pageAccess": {
+    "url": true,
+    "media": true,
+    "selectors": {
+      "playerSurface": {
+        "selector": ".dv-player-fullscreen .atvwebplayersdk-video-surface:has(video)",
+        "read": "text"
+      },
+      "title": {
+        "selector": ".dv-player-fullscreen .atvwebplayersdk-title-text",
+        "read": "text"
+      },
+      "episode": {
+        "selector": ".dv-player-fullscreen .atvwebplayersdk-episode-info",
+        "read": "text"
+      },
+      "advertisement": {
+        "selector": ".dv-player-fullscreen :is(.atvwebplayersdk-ad-timer, .atvwebplayersdk-adtimeindicator-text)",
+        "read": "text"
+      },
+      "detailTitle": {
+        "selector": "#main .DVWebNode-detail-atf-wrapper h1",
+        "read": "text"
+      },
+      "detailLogoTitle": {
+        "selector": "#main .DVWebNode-detail-atf-wrapper h1 img",
+        "read": "attribute",
+        "attribute": "alt"
+      },
+      "showImage": {
+        "selector": "#main .DVWebNode-detail-atf-wrapper img:not(h1 img)",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "showImageAlt": {
+        "selector": "#main .DVWebNode-detail-atf-wrapper img:not(h1 img)",
+        "read": "attribute",
+        "attribute": "alt"
+      },
+      "episode1Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(1) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode1Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(1) h3",
+        "read": "text"
+      },
+      "episode1Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(1) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode2Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(2) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode2Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(2) h3",
+        "read": "text"
+      },
+      "episode2Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(2) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode3Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(3) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode3Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(3) h3",
+        "read": "text"
+      },
+      "episode3Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(3) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode4Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(4) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode4Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(4) h3",
+        "read": "text"
+      },
+      "episode4Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(4) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode5Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(5) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode5Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(5) h3",
+        "read": "text"
+      },
+      "episode5Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(5) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode6Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(6) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode6Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(6) h3",
+        "read": "text"
+      },
+      "episode6Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(6) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode7Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(7) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode7Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(7) h3",
+        "read": "text"
+      },
+      "episode7Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(7) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      },
+      "episode8Label": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(8) a[data-testid=\"episodes-playbutton\"]",
+        "read": "attribute",
+        "attribute": "aria-label"
+      },
+      "episode8Title": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(8) h3",
+        "read": "text"
+      },
+      "episode8Image": {
+        "selector": "#main #tab-content-episodes [id^=\"av-ep-episode-\"]:nth-child(8) [data-testid=\"episode-image\"] img",
+        "read": "attribute",
+        "attribute": "src"
+      }
+    }
   }
 }
