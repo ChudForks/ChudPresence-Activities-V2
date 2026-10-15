@@ -4,7 +4,7 @@ An independent Git repository for programmable, sandboxed Activity API V2
 packages: **Prime Video 2.0.0**, **Google 2.0.1** and **Instagram 2.3.0**. This replaces the old
 declarative V2 repository layout: packages contain `metadata.json` and ordinary
 JavaScript in `activity.js`. The historical JSON packages stay under the Activity
-Lab's `references/legacy-activity-api-v2/` directory.
+Lab's ignored local snapshot; see its `references/README.md` for recovery.
 
 Google supports Homepage, Search, Images and AI Mode with the submitted query,
 visible result statistics and elapsed time. See its [layout and local installation guide](activities/google/README.md).
@@ -43,13 +43,13 @@ it or make it appear in Discover; use Developer mode for local V2 packages.
 activities/prime-video/metadata.json   permissions and fixed public page reads
 activities/prime-video/activity.js     self-contained sandboxed package
 activities/prime-video/icon.png        official service icon
-activities/prime-video/tests/          behavior tests and synthetic player page
-activities/google/                    Google metadata, JavaScript, icon, guide and search fixtures
-activities/instagram/                 Instagram browsing/Reels package, guide and fixtures
+activities/prime-video/tests/          optional local tests and synthetic player page (ignored)
+activities/google/                    Google metadata, JavaScript, icon and guide
+activities/instagram/                 Instagram browsing/Reels package and guide
 catalog.json                          generated metadata and SHA-256 hashes
 schemas/                              V2 metadata, reports, catalog, and SDK types
 sdk/                                  pinned extension validator/page-broker snapshot
-tools/                                CLI, catalog builder, validation and tests
+tools/                                CLI, catalog builder, validation and local test launcher
 .github/workflows/validate.yml         standalone CI
 ACTIVITY_API_V2.md                     upstream API guide
 TESTING.md                            verification and live-service limitations
@@ -63,7 +63,6 @@ Use Node.js 20 or newer (CI uses Node 24).
 npm ci
 npm run build
 npm run check
-npm test
 npm run check:versions
 ```
 
@@ -113,9 +112,12 @@ node tools/sync-sdk.mjs /path/to/Activity-Lab
 node tools/generate-catalog-schema.mjs
 npm run build
 npm run check
-npm test
 ```
 
-The sync is one-way: it never edits the extension or V1 repository. Package tests
-run independently of the lab. Additional `test:extension` and `test:browser`
-commands exercise the actual lab runtime; see [TESTING.md](TESTING.md).
+The sync is one-way: it never edits the extension or V1 repository. Tests and
+fixtures under `activities/*/tests/`, `tools/*.test.*`, and `tools/test-*.mjs`
+are kept locally and ignored by Git. CI runs tracked validation and version checks.
+With the local files present, `npm test`, `npm run test:extension` and
+`npm run test:browser` remain available; see [TESTING.md](TESTING.md).
+A fresh checkout does not include these files. `npm test` reports a missing suite
+instead of claiming a successful zero-test run.

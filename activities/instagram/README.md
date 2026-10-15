@@ -112,33 +112,11 @@ publish the package or add it to Discover.
 
 ## Verification
 
-Package tests cover browsing routes, current profile identity, timer retention
-and reset, identity agreement, fallback, reference layout, pause/progress and
-invalid-winner clearing. `npm run test:browser` includes the
-real-DOM fixture here, the production broker, actual QuickJS interpreter, report
-validator, presence builder and Discord payload builder. It checks deep cards,
-adjacent autoplay, hidden/sensitive metadata, multiple native/shadow players,
-public links, article mode and cleanup. Browsing fixture checks cover Home,
-Search and profile transitions in one document, omitted empty state lines,
-generic Discord activity, elapsed-only timestamps, preferences, route fallback,
-Saved source retention and returning to Reels. Stories, Messages and Settings also pass through
-the real broker and QuickJS without a player. Seeded conversation, account and
-input fields stay out of snapshots and Discord payloads in these fixtures.
-The extension's browser smoke also checks
-scoped data through the actual installed broker/worker path in a disposable profile.
+Optional ignored local tests cover browsing routes and source retention, timers,
+Stories, private-route labels and Reels selection/formatting. The real collector,
+QuickJS and Discord payload builders are exercised with synthetic pages. See
+[the verification guide](../../TESTING.md) for commands, coverage and limits.
 
-The avatar/username structure and corrected selector were checked on the user's
-live Instagram page on October 15, 2026. The browser fixture reproduces the
-original selector clearing, followed by the corrected selector reporting through
-the actual broker and QuickJS. Fixtures use no logged-in session or live traffic.
-The Home-entry regression also checks a same-document Home -> first -> next ->
-return sequence through the real collector and QuickJS, with both hidden and
-visible SVG audio controls. It reproduces the previous `links` rejection and
-verifies that hidden Reel permalinks remain rejected. The corrected declaration
-was checked against the live failing card's duplicate audio controls.
-The live Search navigation destination and profile route were inspected on
-October 15, 2026 for the browsing update. The user's open Story URL also confirmed
-the owner/numeric-ID route. The updated installed package's report
-and actual Discord publication still need a check after reimporting version
-2.3.0; browser policy prevents direct inspection
-of the user's extension Library.
+Live inspection informed creator/audio selectors and route handling. After
+reimporting the current package, its installed preview and actual Discord
+publication still need verification.

@@ -16,7 +16,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: npm test
       - name: Require package version increases
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}

@@ -1,7 +1,7 @@
 # Google V2
 
 Programmable Activity API v2 package, version **2.0.1**, using the archived
-[Google presence layout](../../../references/legacy-activity-api-v2/activity-repository/activities/google/README.md)
+[Google presence layout](https://github.com/ChudForks/ChudPresenceSolo-Chromium-Activity-Lab/blob/v2.0.4/references/legacy-activity-api-v2/activity-repository/activities/google/README.md)
 in the Activity Lab checkout.
 
 | Page | Discord name | Details | State |
@@ -48,5 +48,6 @@ installed source. Generating the local catalog does not publish to Discover.
 
 The PNG is the archived official
 [Google G image](https://www.google.com/images/branding/googleg/2x/googleg_standard_color_128dp.png).
-Behavior, production QuickJS, and browser fixture checks cover the package.
+Optional ignored local tests cover behavior, production QuickJS and browser
+fixtures; see [the verification guide](../../TESTING.md).
 Live Google and Discord rendering still require an installed-session check.

@@ -12,6 +12,10 @@ async function collect(directory) {
 }
 await collect(path.join(root, 'tools'));
 await collect(path.join(root, 'activities'));
+if (!tests.length) {
+  console.error('No local tests found. Tests are kept locally and ignored by Git; use npm run check for tracked repository validation.');
+  process.exit(1);
+}
 const env = { ...process.env };
 delete env.NODE_TEST_CONTEXT;
 execFileSync(process.execPath, ['--test', ...tests.sort()], { cwd: root, stdio: 'inherit', env });
