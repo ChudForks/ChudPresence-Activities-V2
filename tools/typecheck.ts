@@ -14,3 +14,8 @@ export function register(api: ActivityV2API) {
     await api.report(report);
   });
 }
+
+export const browsingReport: ActivityReport = {
+  kind: 'generic', media: { title: 'Browsing example' },
+  display: { details: 'Browsing example', statusDisplayOverride: 'name', hideState: true },
+};
