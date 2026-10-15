@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node tools/run-tests.mjs",
     "test:extension": "node tools/test-extension.mjs",
-    "test:browser": "node tools/test-browser.mjs"
+    "test:browser": "node tools/test-browser.mjs && node tools/test-instagram-browser.mjs"
   },
   "devDependencies": { "esbuild": "0.25.12", "typescript": "7.0.2" },
   "engines": { "node": ">=20" }

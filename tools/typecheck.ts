@@ -3,7 +3,8 @@ import type { ActivityV2API, ActivityV2Metadata, ActivityReport } from '@chudpre
 export const metadata: ActivityV2Metadata = {
   id: 'sdk-sample', name: 'SDK sample', description: 'Checks V2 declarations.',
   version: '1.0.0', apiVersion: 2, entry: 'activity.js', matches: ['https://example.com/*'],
-  pageAccess: { media: true, selectors: { title: { selector: 'h1', read: 'text' } } }
+  pageAccess: { media: true, selectors: { title: { selector: 'h1', read: 'text' } },
+    mediaScopes: { card: { container: '.card', ancestors: 16, selectors: { caption: { selector: '.caption', read: 'text' } } } } }
 };
 export function register(api: ActivityV2API) {
   return api.onUpdate(async () => {

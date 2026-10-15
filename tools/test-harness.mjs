@@ -20,6 +20,7 @@ export function createHarness(source = primeSource, { now = () => Date.now() } =
   let current;
   let callback;
   const calls = [];
+  const logs = [];
   const copy = value => JSON.parse(JSON.stringify(value));
   const api = {
     apiVersion: 2,
@@ -33,10 +34,11 @@ export function createHarness(source = primeSource, { now = () => Date.now() } =
       return { accepted: true };
     },
     async clear() { calls.push({ operation: 'presence.clear' }); return { cleared: true }; },
+    log: Object.fromEntries(['debug', 'info', 'warn', 'error'].map(level => [level, async (...args) => { logs.push({ level, args: copy(args) }); }])),
   };
   const context = createContext({ ChudPresence: api, Date: class extends Date { static now() { return now(); } } });
   new Script(source).runInContext(context, { timeout: 1000 });
-  return { calls, async update(snapshot) {
+  return { calls, logs, async update(snapshot) {
     current = copy(snapshot);
     const before = calls.length;
     await callback(current);

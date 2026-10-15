@@ -4,7 +4,7 @@ Verified locally on October 15, 2026:
 
 - `npm run check`: TypeScript declarations, pinned SDK/extension agreement,
   metadata/source/icon validation and catalog hashes passed.
-- `npm test`: 38 tests passed, including Prime Video movie/episode formatting,
+- `npm test`: 44 tests passed, including Prime Video movie/episode formatting,
   artwork agreement, title retention, clearing, pause/seek, invalid package
   rejection, semantic-version comparison and an isolated TypeScript CLI build.
   Google tests cover Homepage, Search/Web, modern/legacy Images, AI Mode,
@@ -12,6 +12,11 @@ Verified locally on October 15, 2026:
   parameters, unsupported pages, hidden tabs, and session timer retention/reset.
   Google 2.0.1 additionally covers bounded readiness gaps during query/mode
   transitions, omitting stale statistics and expiring at a fixed deadline.
+  Instagram 2.0.2 covers the archived Reels-only layout, default/article modes,
+  largest paused player beside autoplay, missing captions/permalinks, public
+  creator agreement, detail/card identity conflicts and invalid-winner clearing.
+  Diagnostic tests verify zero-report clear reasons, deduplication and recovery,
+  without captions, handles or URLs in logs.
 - `npm run test:extension`: the current extension accepted the catalog and ran
   the package in its actual QuickJS/WASM interpreter. Validated report/clear
   operations for playback, hidden controls, pause/seek, episode changes, player
@@ -27,6 +32,41 @@ Verified locally on October 15, 2026:
   page verifies declared query reads, visible-only statistics, modes/homepage,
   duplicate parameters, SPA routes, hidden readiness and visibility resets.
   Captured snapshots exclude seeded drafts, snippets, AI responses and tracking.
+  Instagram's fixture also passes deep nested cards, single-player scope binding,
+  invalid first/hidden fields, multiple native/shadow players, fallback,
+  article/detail routes and visibility cleanup. Its reports pass through actual
+  presence/Discord builders with static artwork, native timestamps, buttons and
+  user preferences. No account or live-service request is used.
+  The avatar-first regression reproduces the original metadata selector clearing
+  and the updated selector reporting in the same real DOM. Avatar-only cards
+  still clear. Separate navigation fixtures use a fresh guest per document,
+  matching production lifetime and request quotas.
+  The Home-entry regression keeps one document/guest across Home -> first Reel
+  -> next -> return, retaining the hidden/visible SVG audio-control pair from the
+  observed failing layout. Broad `a` reads reproduce the rejected `links` field;
+  2.0.2 reports the first Reel and the returning Reel. An unrelated hidden Reel
+  permalink still clears, preserving the existing broker guard.
+
+The live Instagram DOM was inspected on October 15, 2026 after the initial
+2.0.0 package produced no reports. Two creator anchors share the same aria-label
+and href, with an empty avatar anchor first. The old selector read empty text;
+2.0.1 reads the visible username link on that live page. The user's shared
+snapshot confirmed a locally installed 2.0.0 with no accepted reports/errors.
+Its pre-report clears are ignored as stale by the manager, explaining the empty
+last-clear field. Extension-page browser access was blocked; an installed 2.0.1
+report and actual Discord publication remain unverified pending reimport.
+
+The subsequent Home-entry failure was inspected on the live page and matched the
+user's `card-fields-rejected` / `links` log. Its card contains four anchors: two
+creator links and hidden/visible copies of the same `/reels/audio/.../` control.
+Both audio anchors contain an SVG with `aria-label="Audio image"`. The 2.0.2
+declaration excludes those two controls, leaving two visible creator links and
+no hidden candidates. It changes no extension runtime, permissions or filters.
+
+Extension 2.0.2's unpacked-extension smoke additionally passes scoped fields
+through the real USER_SCRIPT -> worker -> QuickJS path, with native canvas media
+and deeply frozen sanitized output. Existing strict-CSP, credential-isolation,
+network denial, resource-failure, lifecycle and navigation tests remain passing.
 
 Extension 2.0.1's `npm run test:v2-browser` also covers actual cross-document
 navigation using an opted-in Activity: mode links and submitted forms, retained

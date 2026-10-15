@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-15T14:13:00.910Z",
+  "generatedAt": "2026-10-15T17:55:25.755Z",
   "activities": [
     {
       "id": "google",
@@ -66,6 +66,104 @@
       "metadataSha256": "243e4a3c57b36ad7d23081a5e446fead10f2cdcee60d9b7a8c0b38f9a8a5879d",
       "icon": "activities/google/icon.png",
       "iconSha256": "6fae509b81bc94fef1b4ac2cdae8f1889df2da9f736f050cd32e337517494084"
+    },
+    {
+      "id": "instagram",
+      "name": "Instagram",
+      "description": "Show the selected Instagram Reel caption, creator, native playback progress, Instagram logo and public Reel/Profile buttons.",
+      "version": "2.0.2",
+      "apiVersion": 2,
+      "minExtensionVersion": "2.0.2",
+      "author": {
+        "name": "ChudPresence"
+      },
+      "category": "video",
+      "defaultMediaKind": "video",
+      "tags": [
+        "reels",
+        "social",
+        "video"
+      ],
+      "serviceUrl": "https://www.instagram.com/",
+      "matches": [
+        "https://www.instagram.com/reels*",
+        "https://instagram.com/reels*",
+        "https://www.instagram.com/reel/*",
+        "https://instagram.com/reel/*"
+      ],
+      "frames": "top",
+      "network": [],
+      "settingsUi": {
+        "statusLabels": {
+          "app": "Instagram",
+          "artist": "Creator",
+          "track": "Reel"
+        }
+      },
+      "pageAccess": {
+        "url": true,
+        "media": true,
+        "mediaScopes": {
+          "reel": {
+            "ancestors": 16,
+            "container": ":has(a[aria-label$=\" reels\"])",
+            "exclude": "[id^=\"mount_\"]",
+            "selectors": {
+              "creatorText": {
+                "selector": "a[aria-label$=\" reels\"]:has(> span), a[aria-label$=\" reels\"]:not(:has(*))",
+                "read": "text"
+              },
+              "creatorHref": {
+                "selector": "a[aria-label$=\" reels\"]:has(> span), a[aria-label$=\" reels\"]:not(:has(*))",
+                "read": "attribute",
+                "attribute": "href"
+              },
+              "caption": {
+                "selector": "[role=\"button\"] > div > div[dir=\"auto\"]",
+                "read": "text"
+              },
+              "links": {
+                "selector": "a:not(:has([aria-label=\"Audio image\"]))",
+                "read": "attribute",
+                "attribute": "href",
+                "all": true
+              }
+            }
+          },
+          "article": {
+            "ancestors": 16,
+            "container": ":has(header a)",
+            "exclude": "[id^=\"mount_\"]",
+            "selectors": {
+              "creatorText": {
+                "selector": "header a:has(> span), header a:not(:has(*))",
+                "read": "text"
+              },
+              "creatorHref": {
+                "selector": "header a:has(> span), header a:not(:has(*))",
+                "read": "attribute",
+                "attribute": "href"
+              },
+              "caption": {
+                "selector": "h1",
+                "read": "text"
+              },
+              "links": {
+                "selector": "a:not(:has([aria-label=\"Audio image\"]))",
+                "read": "attribute",
+                "attribute": "href",
+                "all": true
+              }
+            }
+          }
+        }
+      },
+      "entry": "activities/instagram/activity.js",
+      "metadata": "activities/instagram/metadata.json",
+      "sha256": "762cab0c699732bbf1db54e8e8063f213819d2f1e833514a8d339f048e5d1157",
+      "metadataSha256": "09774d5f26ef80045e79e755e582e841a125224b2ce05a912f677292c1072646",
+      "icon": "activities/instagram/icon.png",
+      "iconSha256": "319808354a4def201154a6586c8fb50d4da6e07a98748fbf6c04e50a4f033540"
     },
     {
       "id": "prime-video",

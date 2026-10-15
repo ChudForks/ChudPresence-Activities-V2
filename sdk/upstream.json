@@ -1,10 +1,10 @@
 {
   "repository": "ChudForks/ChudPresenceSolo-Chromium-Activity-Lab",
-  "revision": "3d189dae5f391833a8e372f06d14a3d67d5bf6b3",
+  "revision": "e1ce10c800d68b1f7f7ed4161c4d3ae3c030ed77",
   "files": {
     "ACTIVITY_API_V2.md": {
       "source": "extension/ACTIVITY_API_V2.md",
-      "sha256": "2b875f0e44f5f0f58f3a243b22a0829e7883c16ad48f329ecd0c98f8f6d4b8b0"
+      "sha256": "1b2058d31cf5ab88287333ccf2c325ed5fc3b4f2d10572e8b21ef1e6e8f9c9e4"
     },
     "schemas/activity-report.schema.json": {
       "source": "schemas/activity-v2-report.schema.json",
@@ -12,15 +12,15 @@
     },
     "schemas/activity-api-v2.json": {
       "source": "schemas/activity-api-v2.json",
-      "sha256": "98cf3c1f422093ea78d6a764f40f5d96556986352e8cf5eb873ea13db2c49909"
+      "sha256": "25a8290efba5bbae83fdb06cc1995209941f889bc355060502803b149c3c033c"
     },
     "schemas/activity-v2.schema.json": {
       "source": "schemas/activity-v2.schema.json",
-      "sha256": "51320c6ec71fde2137df0cafba44b2ddcdc6fb40dd73098a14d320ce44cee5ed"
+      "sha256": "8f4e5b3038d8665ec79ae036fbfb7185a43d379eda7da4d0d17a717f30bcd051"
     },
     "schemas/activity-api-v2.d.ts": {
       "source": "schemas/activity-api-v2.d.ts",
-      "sha256": "ccf63fed87296cb24b071bde771eb068c7dfa6718111d655773da18c80acc777"
+      "sha256": "219f3d9d8d0510a411c9381ca6c6c51a6a10f4831617abc3f80b66ec67ceb9d2"
     },
     "sdk/activity-validator.js": {
       "source": "extension/core/activity-validator.js",
@@ -36,7 +36,7 @@
     },
     "sdk/activity-v2-page.js": {
       "source": "extension/core/activity-v2-page.js",
-      "sha256": "d55d7e450a77c40c354ae25624852e2a0c6a16228023e8397b7f7a1fd541b014"
+      "sha256": "398bc63740ce57e25f3d83a6dea49c6de8730682d808955d6d4ab0e7815a9ecc"
     }
   }
 }

@@ -1,0 +1,34 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Isolated Instagram Reels fixture</title>
+<style>
+  .card { position: fixed; width: 400px; height: 600px; left: 200px; top: 60px; }
+  #neighbor { width: 100px; height: 100px; left: 0; top: 0; }
+  .player, .player div, video { width: 100%; height: 100%; }
+  .creator, .caption, .permalink { position: absolute; left: 10px; bottom: 20px; }
+  .creator { bottom: 80px; } .permalink { bottom: 0; }
+</style></head><body>
+<div id="mount_fixture"><main>
+  <div id="neighbor" class="card">
+    <div class="player"><video></video></div>
+    <a class="avatar" aria-label="neighbor.creator reels" href="/neighbor.creator/reels/"><div><img alt="Profile picture"></div></a>
+    <a class="creator" aria-label="neighbor.creator reels" href="/neighbor.creator/reels/"><span>neighbor.creator</span></a>
+    <div role="button" class="caption"><div><div dir="auto">Neighbor autoplay</div></div></div>
+    <a class="permalink" href="/reel/Neighbor_ID/">View</a>
+  </div>
+  <div id="current" class="card">
+    <div class="player"><div><div><div><div><div><div><div><div><div><div><div><div><video></video></div></div></div></div></div></div></div></div></div></div></div></div></div>
+    <a class="avatar" aria-label="example.creator reels" href="/example.creator/reels/"><div><img alt="Profile picture"></div></a>
+    <a class="creator" aria-label="example.creator reels" href="/example.creator/reels/?tracking=PRIVATE#fragment"><span>example.creator</span></a>
+    <div role="button" class="caption"><div><div dir="auto">A great reel <span>#hello</span></div></div></div>
+    <a class="permalink" href="/reels/Example_123-/?tracking=PRIVATE#fragment">View</a>
+    <h2>PRIVATE_COMMENT unrelated heading</h2>
+  </div>
+  <form><input type="password" value="PRIVATE_PASSWORD"><textarea>PRIVATE_MESSAGE</textarea></form>
+</main></div>
+<script>
+  for (const video of document.querySelectorAll('video')) {
+    for (const [name, value] of Object.entries({ readyState: 4, duration: 60, currentTime: 12, paused: video.closest('#current') !== null, ended: false, playbackRate: 1 })) {
+      Object.defineProperty(video, name, { configurable: true, value });
+    }
+  }
+</script></body></html>

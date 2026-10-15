@@ -1,0 +1,47 @@
+{
+  "id": "instagram",
+  "name": "Instagram",
+  "description": "Show the selected Instagram Reel caption, creator, native playback progress, Instagram logo and public Reel/Profile buttons.",
+  "version": "2.0.2",
+  "apiVersion": 2,
+  "minExtensionVersion": "2.0.2",
+  "author": { "name": "ChudPresence" },
+  "category": "video",
+  "defaultMediaKind": "video",
+  "tags": ["reels", "social", "video"],
+  "serviceUrl": "https://www.instagram.com/",
+  "matches": ["https://www.instagram.com/reels*", "https://instagram.com/reels*", "https://www.instagram.com/reel/*", "https://instagram.com/reel/*"],
+  "entry": "activity.js",
+  "icon": "icon.png",
+  "frames": "top",
+  "network": [],
+  "settingsUi": { "statusLabels": { "app": "Instagram", "artist": "Creator", "track": "Reel" } },
+  "pageAccess": {
+    "url": true,
+    "media": true,
+    "mediaScopes": {
+      "reel": {
+        "ancestors": 16,
+        "container": ":has(a[aria-label$=\" reels\"])",
+        "exclude": "[id^=\"mount_\"]",
+        "selectors": {
+          "creatorText": { "selector": "a[aria-label$=\" reels\"]:has(> span), a[aria-label$=\" reels\"]:not(:has(*))", "read": "text" },
+          "creatorHref": { "selector": "a[aria-label$=\" reels\"]:has(> span), a[aria-label$=\" reels\"]:not(:has(*))", "read": "attribute", "attribute": "href" },
+          "caption": { "selector": "[role=\"button\"] > div > div[dir=\"auto\"]", "read": "text" },
+          "links": { "selector": "a:not(:has([aria-label=\"Audio image\"]))", "read": "attribute", "attribute": "href", "all": true }
+        }
+      },
+      "article": {
+        "ancestors": 16,
+        "container": ":has(header a)",
+        "exclude": "[id^=\"mount_\"]",
+        "selectors": {
+          "creatorText": { "selector": "header a:has(> span), header a:not(:has(*))", "read": "text" },
+          "creatorHref": { "selector": "header a:has(> span), header a:not(:has(*))", "read": "attribute", "attribute": "href" },
+          "caption": { "selector": "h1", "read": "text" },
+          "links": { "selector": "a:not(:has([aria-label=\"Audio image\"]))", "read": "attribute", "attribute": "href", "all": true }
+        }
+      }
+    }
+  }
+}
