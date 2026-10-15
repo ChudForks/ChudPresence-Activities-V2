@@ -1,0 +1,24 @@
+{
+  "name": "@chudpresence/activity-sdk-v2",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Programmable sandboxed Activity API V2 packages and authoring tools.",
+  "types": "./schemas/activity-api-v2.d.ts",
+  "exports": { "./types": "./schemas/activity-api-v2.d.ts" },
+  "bin": { "chudpresence-v2": "tools/chudpresence.mjs" },
+  "scripts": {
+    "activity": "node tools/chudpresence.mjs activity",
+    "build": "node tools/build-catalog.mjs",
+    "check": "npm run typecheck && npm run check:contract && npm run check:catalog",
+    "check:contract": "node tools/check-contract.mjs",
+    "check:catalog": "node tools/build-catalog.mjs --check",
+    "check:versions": "node tools/check-version-bumps.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node tools/run-tests.mjs",
+    "test:extension": "node tools/test-extension.mjs",
+    "test:browser": "node tools/test-browser.mjs"
+  },
+  "devDependencies": { "esbuild": "0.25.12", "typescript": "7.0.2" },
+  "engines": { "node": ">=20" }
+}

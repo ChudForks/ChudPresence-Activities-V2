@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Prime Video synthetic player</title>
+<style>.atvwebplayersdk-video-surface, video { width: 1280px; height: 720px; } img { width: 180px; height: 100px; }</style>
+</head><body>
+<main id="main">
+  <section class="DVWebNode-detail-atf-wrapper">
+    <h1>Yu-Gi-Oh!</h1>
+    <img alt="Yu-Gi-Oh!" src="https://m.media-amazon.com/images/S/pv-target-images/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jpg">
+  </section>
+  <section id="tab-content-episodes">
+    <article id="av-ep-episode-one">
+      <h3>1. The Heart of the Cards</h3><a data-testid="episodes-playbutton" aria-label="Play S1 E1">Play</a>
+      <div data-testid="episode-image"><img src="https://m.media-amazon.com/images/S/pv-target-images/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.jpg"></div>
+    </article>
+    <article id="av-ep-episode-two">
+      <h3>2. The Gauntlet Is Thrown</h3><a data-testid="episodes-playbutton" aria-label="Play S1 E2">Play</a>
+      <div data-testid="episode-image"><img src="https://m.media-amazon.com/images/S/pv-target-images/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.jpg"></div>
+    </article>
+  </section>
+</main>
+<div class="dv-player-fullscreen">
+  <div class="atvwebplayersdk-title-text">Yu-Gi-Oh!</div>
+  <div class="atvwebplayersdk-episode-info">S1 E1 The Heart of the Cards</div>
+  <div class="atvwebplayersdk-video-surface"><video aria-hidden="true"></video></div>
+</div>
+<script>
+Object.defineProperties(document.querySelector('video'), {
+  currentTime: { configurable: true, value: 120 }, duration: { configurable: true, value: 1440 },
+  paused: { configurable: true, value: false }, ended: { configurable: true, value: false },
+  playbackRate: { configurable: true, value: 1 }
+});
+</script>
+</body></html>

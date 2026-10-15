@@ -1,0 +1,23 @@
+name: Validate programmable V2 Activities
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - name: Require package version increases
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: npm run check:versions
