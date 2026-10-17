@@ -1,18 +1,18 @@
 {
   "repository": "ChudForks/ChudPresenceSolo-Chromium-Activity-Lab",
-  "revision": "9b26e3e6a1a8fec5511011018b43e109246a2f58",
+  "revision": "c1fc6e410525a3d3c6a04267ae68ab87e34eba1a",
   "files": {
     "ACTIVITY_API_V2.md": {
       "source": "extension/ACTIVITY_API_V2.md",
-      "sha256": "57887f267eeff9b1ffed772f9311291e59766efcd6f7480397813606ce7b6918"
+      "sha256": "57e2f1180e691e85eba4035182c5ceddb8c8d19bdcb25e3112fa459c3098423f"
     },
     "schemas/activity-report.schema.json": {
       "source": "schemas/activity-v2-report.schema.json",
-      "sha256": "ab7d8e10185002f17579126b5f49a1a12a1ea7ef26adaf73813fc478043f8efb"
+      "sha256": "cbe22c421e28cfa5ae86a175243108371ef3ae6ee8b40ea307a3b7b47edcda7e"
     },
     "schemas/activity-api-v2.json": {
       "source": "schemas/activity-api-v2.json",
-      "sha256": "55c51839ab50cb0306853b6055b5f8bd924a3d2283094533b193422f12b8c2aa"
+      "sha256": "26dc32a67d0134a5f548d420b6505a153fcb4d4596b426d06c1ad4cf2112d366"
     },
     "schemas/activity-v2.schema.json": {
       "source": "schemas/activity-v2.schema.json",
@@ -20,11 +20,11 @@
     },
     "schemas/activity-api-v2.d.ts": {
       "source": "schemas/activity-api-v2.d.ts",
-      "sha256": "c9c92440cf1d573f59da7cf1f9ad4d4f4874c5ab1f177488d4046554161b3d0c"
+      "sha256": "aaa5f7775b993891390f51e9fd9216b04416880925d786a963f4ed965ada89c0"
     },
     "sdk/activity-validator.js": {
       "source": "extension/core/activity-validator.js",
-      "sha256": "2b6f4bd43b90766d72b39c02b4865978708980d367755b96b9463bf734426879"
+      "sha256": "0091136b0dc89120eec8da3016c50473a45e405f8ef8935df63c7621deed9d42"
     },
     "sdk/activity-settings.js": {
       "source": "extension/core/activity-settings.js",
@@ -32,7 +32,7 @@
     },
     "sdk/activity-contract.generated.js": {
       "source": "extension/core/activity-contract.generated.js",
-      "sha256": "99b98bd600ac8086fbfbaa913c63c7beb474477a72986a79d99466bc84950206"
+      "sha256": "01aa86712504b3f8d43417b9b78a4b0ef4422920aa78cb5a5638ad812b95d522"
     },
     "sdk/activity-v2-page.js": {
       "source": "extension/core/activity-v2-page.js",

@@ -1,8 +1,13 @@
 # Instagram (programmable API v2)
 
-Version **2.3.0**, requiring Activity Lab **2.0.2** or newer. Home, Search,
+Version **2.3.1**, requiring Activity Lab **2.0.5** or newer. Home, Search,
 profiles, Stories, Messages, Settings and Saved use elapsed page activity, alongside
 the archived Instagram Reels caption/creator layout in sandboxed JavaScript.
+
+Browsing reports use `focusPolicy: 'foreground'`. The core suppresses them when
+switching tabs or leaving the browser, keeps them while toolbar popups have page
+focus, and restores valid reports on return. Their elapsed session continues
+while suppressed. Reel playback retains its existing visibility policy.
 
 | Page | First line | Second line | Progress | Buttons |
 | --- | --- | --- | --- | --- |

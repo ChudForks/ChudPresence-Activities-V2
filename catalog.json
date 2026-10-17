@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-15T18:31:24.900Z",
+  "generatedAt": "2026-10-17T23:04:22.980Z",
   "activities": [
     {
       "id": "google",
       "name": "Google",
       "description": "Show the Google homepage, Search, Images and AI Mode with the submitted query, visible search statistics and elapsed time.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "apiVersion": 2,
-      "minExtensionVersion": "2.0.1",
+      "minExtensionVersion": "2.0.5",
       "author": {
         "name": "ChudPresence"
       },
@@ -62,8 +62,8 @@
       },
       "entry": "activities/google/activity.js",
       "metadata": "activities/google/metadata.json",
-      "sha256": "343c4af5f82ccf08d2c2e3170bd51b731beedeb2f3bd4f3ce55994d103154513",
-      "metadataSha256": "243e4a3c57b36ad7d23081a5e446fead10f2cdcee60d9b7a8c0b38f9a8a5879d",
+      "sha256": "6a82390f54f40c8d6c1c69d6a134a3fc3bf1f2a45dda375d40db64c769c13857",
+      "metadataSha256": "b96bee244c348652f93a35f1622b7ed176836146a7845437a62c6ecdce9a260d",
       "icon": "activities/google/icon.png",
       "iconSha256": "6fae509b81bc94fef1b4ac2cdae8f1889df2da9f736f050cd32e337517494084"
     },
@@ -71,9 +71,9 @@
       "id": "instagram",
       "name": "Instagram",
       "description": "Show Instagram Home, Search, profiles, Stories, Messages, Settings and Saved, with an On Instagram fallback, plus selected Reel captions, creators and playback progress.",
-      "version": "2.3.0",
+      "version": "2.3.1",
       "apiVersion": 2,
-      "minExtensionVersion": "2.0.2",
+      "minExtensionVersion": "2.0.5",
       "author": {
         "name": "ChudPresence"
       },
@@ -165,8 +165,8 @@
       },
       "entry": "activities/instagram/activity.js",
       "metadata": "activities/instagram/metadata.json",
-      "sha256": "c9e567a85850ece7ec7dbdfe7036d69e3ddd7b8d2098c92822c0fcce03c93d30",
-      "metadataSha256": "973b744afb1a1b77514de616196a08217a28dba043fec021c93842556bbca419",
+      "sha256": "6f881f4b6b874009fe35d546e6b0c22fa44050493377f0da742f52de815ac6ff",
+      "metadataSha256": "17848823fe4df065ba8468a9ab8f4475481b86ea0fa79d91bdfc465d85b06ac3",
       "icon": "activities/instagram/icon.png",
       "iconSha256": "319808354a4def201154a6586c8fb50d4da6e07a98748fbf6c04e50a4f033540"
     },

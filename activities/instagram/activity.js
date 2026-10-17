@@ -63,14 +63,11 @@
     const browsing = browsingRoute(path) || (post ? browsingContext : null) ||
       (!reelPage ? { key: 'instagram', title: 'Instagram', details: 'On Instagram' } : null);
     browsingContext = browsing?.retainPosts ? browsing : null;
-    if (page.visibilityState !== 'visible') {
-      await clear('page-ineligible', { visibility: page.visibilityState || 'unavailable' }); return;
-    }
     if (browsing) {
       const now = Date.now();
       if (session?.key !== browsing.key) session = { key: browsing.key, startedAt: now };
       await ChudPresence.report({
-        kind: 'generic', media: { title: browsing.title },
+        kind: 'generic', focusPolicy: 'foreground', media: { title: browsing.title },
         display: { name: 'Instagram', details: browsing.details, state: browsing.username ? '@' + browsing.username : '', statusDisplay: 'name' },
         playback: { state: 'playing', elapsed: true, position: Math.min(31536000, Math.max(0, (now - session.startedAt) / 1000)) },
         artwork: { large: logo, largeText: 'Instagram' },
@@ -81,6 +78,9 @@
         await ChudPresence.log.info('Instagram: reporting browsing activity');
       }
       return;
+    }
+    if (page.visibilityState !== 'visible') {
+      await clear('page-ineligible', { visibility: page.visibilityState || 'unavailable' }); return;
     }
     session = null;
     // Choose the player before examining its metadata. A broken winning card

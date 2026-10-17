@@ -7,7 +7,7 @@
 
   function route(page) {
     if (!['https://www.google.com', 'https://google.com'].includes(page.origin) ||
-        page.visibilityState !== 'visible' || page.queryDuplicates?.length) return null;
+        page.queryDuplicates?.length) return null;
     const parameters = page.query || {};
     const query = text(parameters.q);
     const udm = parameters.udm ?? '';
@@ -48,6 +48,7 @@
     const summary = ready && current.id === 'search' ? text(ChudPresence.page.read('resultStats')) : '';
     await ChudPresence.report({
       kind: 'generic',
+      focusPolicy: 'foreground',
       media: { title: homepage ? 'Homepage' : current.query.slice(0, 256) },
       display: {
         name: current.name,

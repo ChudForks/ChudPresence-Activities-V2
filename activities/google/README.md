@@ -1,6 +1,6 @@
 # Google V2
 
-Programmable Activity API v2 package, version **2.0.1**, using the archived
+Programmable Activity API v2 package, version **2.0.2**, using the archived
 [Google presence layout](https://github.com/ChudForks/ChudPresenceSolo-Chromium-Activity-Lab/blob/v2.0.4/references/legacy-activity-api-v2/activity-repository/activities/google/README.md)
 in the Activity Lab checkout.
 
@@ -13,8 +13,10 @@ in the Activity Lab checkout.
 
 All modes use Playing, the existing official Google G image, mode-name compact
 status, and elapsed time. Artwork and timer preferences are honored by the
-extension. Query/mode changes, hiding the tab, and unsupported routes reset the
-timer. Tracking-only changes and brief Google apps header replacement preserve
+extension. Query/mode changes and unsupported routes reset the timer.
+The core suppresses `focusPolicy: 'foreground'` reports on tab/window focus loss,
+keeps them during toolbar popup use, and restores valid reports on return. The
+elapsed session continues while suppressed. Tracking-only changes and brief Google apps header replacement preserve
 the same search session. Once a page is ready, a missing header is tolerated for
 at most four seconds; prolonged absence clears and resets the session. Result
 statistics are omitted during that gap.
@@ -39,8 +41,8 @@ submitted search text may be shared with Discord when sharing is enabled.
 Hidden/missing statistics are omitted; no result count is fabricated. No network
 service is requested by the package.
 
-Reload Activity Lab extension **2.0.1** first: this package uses v2
-`display.name`, `playback.elapsed`, visibility and duplicate-parameter snapshots.
+Reload Activity Lab extension **2.0.5** first: this package uses the shared
+per-report `focusPolicy` alongside v2 `display.name` and `playback.elapsed`.
 In **Activity Library → Developer → Load local Activity**, select
 `metadata.json`, `activity.js`, and `icon.png` from this folder, then approve the
 declared Google origins. After editing, load the files again to replace the
